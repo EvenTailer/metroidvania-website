@@ -228,17 +228,7 @@ export const RoomMatrixPage: React.FC<RoomMatrixPageProps> = ({
   };
 
   return (
-    <div
-      className="view-content view-content--matrix"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        minHeight: 0,
-        overflow: 'hidden',
-        boxSizing: 'border-box'
-      }}
-    >
+    <div className="view-content view-content--matrix">
       {/* Onboarding Guide Banner */}
       <RoomEditorGuideBanner />
 
@@ -266,48 +256,42 @@ export const RoomMatrixPage: React.FC<RoomMatrixPageProps> = ({
       />
 
       {/* Main Layout: 2D Grid Canvas + Details Drawer */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) 350px',
-          gap: '14px',
-          flex: 1,
-          minHeight: 0,
-          height: '100%',
-          overflow: 'hidden'
-        }}
-      >
-        <RoomMapGrid
-          rooms={rooms}
-          sectors={sectors}
-          selectedRoomId={selectedRoomId}
-          activeSectorId={activeFilterSector}
-          gatingResult={gatingResult}
-          zoom={zoom}
-          onZoomChange={setZoom}
-          onSelectRoom={onSelectRoom}
-          onMoveRoomToPosition={(id, gx, gy) => onSetRoomPosition(id, gx, gy)}
-          onConnectRooms={handleConnect}
-          onOpenConnectionEdit={handleOpenConnectionEdit}
-          onDoubleClickCanvas={(gx, gy) => handleOpenCreateModal(gx, gy)}
-        />
+      <div className="matrix-layout-grid">
+        <div className="matrix-map-wrapper">
+          <RoomMapGrid
+            rooms={rooms}
+            sectors={sectors}
+            selectedRoomId={selectedRoomId}
+            activeSectorId={activeFilterSector}
+            gatingResult={gatingResult}
+            zoom={zoom}
+            onZoomChange={setZoom}
+            onSelectRoom={onSelectRoom}
+            onMoveRoomToPosition={(id, gx, gy) => onSetRoomPosition(id, gx, gy)}
+            onConnectRooms={handleConnect}
+            onOpenConnectionEdit={handleOpenConnectionEdit}
+            onDoubleClickCanvas={(gx, gy) => handleOpenCreateModal(gx, gy)}
+          />
+        </div>
 
-        <RoomDetailDrawer
-          room={selectedRoom}
-          sectors={sectors}
-          allRooms={rooms}
-          gatingResult={gatingResult}
-          onEditRoom={handleOpenEditModal}
-          onDeleteRoom={handleDeleteRoom}
-          onCopyScenePath={handleCopyScenePath}
-          onSelectConnectedRoom={onSelectRoom}
-          onUpdateImage={onUpdateRoomImage}
-          onOpenLightbox={onOpenLightbox}
-          spawns={roomSpawns}
-          onOpenEnemy={onOpenEnemy}
-          bugs={roomBugs}
-          onOpenBug={onOpenBug}
-        />
+        <div className="matrix-drawer-wrapper">
+          <RoomDetailDrawer
+            room={selectedRoom}
+            sectors={sectors}
+            allRooms={rooms}
+            gatingResult={gatingResult}
+            onEditRoom={handleOpenEditModal}
+            onDeleteRoom={handleDeleteRoom}
+            onCopyScenePath={handleCopyScenePath}
+            onSelectConnectedRoom={onSelectRoom}
+            onUpdateImage={onUpdateRoomImage}
+            onOpenLightbox={onOpenLightbox}
+            spawns={roomSpawns}
+            onOpenEnemy={onOpenEnemy}
+            bugs={roomBugs}
+            onOpenBug={onOpenBug}
+          />
+        </div>
       </div>
 
       {/* Modals */}

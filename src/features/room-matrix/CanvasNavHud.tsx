@@ -33,8 +33,9 @@ export const CanvasNavHud: React.FC<CanvasNavHudProps> = ({
         userSelect: 'none'
       }}
     >
-      {/* Navigation Instruction Pill */}
+      {/* Navigation Instruction Pill (Desktop) */}
       <div
+        className="canvas-nav-desktop-help"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -56,6 +57,24 @@ export const CanvasNavHud: React.FC<CanvasNavHudProps> = ({
         <span style={{ color: 'var(--accent-cyan)' }}>
           <strong>Точки</strong>: нити связи
         </span>
+      </div>
+
+      {/* Navigation Instruction Pill (Mobile) */}
+      <div
+        className="canvas-nav-mobile-help"
+        style={{
+          display: 'none',
+          alignItems: 'center',
+          gap: '6px',
+          paddingRight: '8px',
+          borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+          fontSize: '10.5px',
+          color: 'var(--text-muted)'
+        }}
+      >
+        <span>🖐️ <strong>Фон</strong>: сдвиг</span>
+        <span style={{ opacity: 0.4 }}>•</span>
+        <span>🤏 <strong>2 пальца</strong>: зум</span>
       </div>
 
       {/* Zoom Controls */}

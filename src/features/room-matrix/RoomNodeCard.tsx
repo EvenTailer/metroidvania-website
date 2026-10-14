@@ -107,6 +107,7 @@ export const RoomNodeCard: React.FC<RoomNodeCardProps> = ({
 
   return (
     <div
+      className={`room-node-card ${isSelected ? 'selected' : ''}`}
       onClick={onSelect}
       onMouseDown={e => {
         if (e.button === 1) return; // Allow middle-click canvas pan

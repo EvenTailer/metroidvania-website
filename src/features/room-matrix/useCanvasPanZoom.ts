@@ -105,6 +105,105 @@ export function useCanvasPanZoom({
     };
   }, []);
 
+  // Touch listeners for mobile: 1-finger canvas panning, 2-finger pinch-to-zoom
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    let touchStartDist = 0;
+    let initialZoom = 1;
+    let touchStartPan = { x: 0, y: 0 };
+    let touchStartCenter = { x: 0, y: 0 };
+    let isTouchPanning = false;
+
+    const getTouchDist = (t1: Touch, t2: Touch) => {
+      const dx = t1.clientX - t2.clientX;
+      const dy = t1.clientY - t2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const getTouchCenter = (t1: Touch, t2: Touch) => {
+      return {
+        x: (t1.clientX + t2.clientX) / 2,
+        y: (t1.clientY + t2.clientY) / 2
+      };
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const target = e.target as HTMLElement | null;
+      // Do not intercept interactive elements
+      if (target?.closest('button, input, select, textarea, .room-port-handle, .chip-btn')) {
+        return;
+      }
+
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        isTouchPanning = true;
+        touchStartDist = getTouchDist(e.touches[0], e.touches[1]);
+        initialZoom = zoomRef.current;
+        touchStartPan = { ...panRef.current };
+        touchStartCenter = getTouchCenter(e.touches[0], e.touches[1]);
+      } else if (e.touches.length === 1) {
+        // Only pan if touching canvas background (not inside a room card)
+        const insideCard = target?.closest('.room-node-card');
+        if (!insideCard) {
+          isTouchPanning = true;
+          touchStartPan = { ...panRef.current };
+          touchStartCenter = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isTouchPanning) return;
+
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const dist = getTouchDist(e.touches[0], e.touches[1]);
+        const center = getTouchCenter(e.touches[0], e.touches[1]);
+        const scale = dist / (touchStartDist || 1);
+        const rawZoom = initialZoom * scale;
+        const nextZoom = Math.min(2.2, Math.max(0.4, Math.round(rawZoom * 100) / 100));
+
+        const dx = center.x - touchStartCenter.x;
+        const dy = center.y - touchStartCenter.y;
+
+        setPan({
+          x: Math.round(touchStartPan.x + dx),
+          y: Math.round(touchStartPan.y + dy)
+        });
+
+        if (onZoomChange && nextZoom !== zoomRef.current) {
+          onZoomChange(nextZoom);
+        }
+      } else if (e.touches.length === 1) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - touchStartCenter.x;
+        const dy = e.touches[0].clientY - touchStartCenter.y;
+        setPan({
+          x: Math.round(touchStartPan.x + dx),
+          y: Math.round(touchStartPan.y + dy)
+        });
+      }
+    };
+
+    const handleTouchEnd = () => {
+      isTouchPanning = false;
+    };
+
+    el.addEventListener('touchstart', handleTouchStart, { passive: false });
+    el.addEventListener('touchmove', handleTouchMove, { passive: false });
+    el.addEventListener('touchend', handleTouchEnd);
+    el.addEventListener('touchcancel', handleTouchEnd);
+
+    return () => {
+      el.removeEventListener('touchstart', handleTouchStart);
+      el.removeEventListener('touchmove', handleTouchMove);
+      el.removeEventListener('touchend', handleTouchEnd);
+      el.removeEventListener('touchcancel', handleTouchEnd);
+    };
+  }, [onZoomChange]);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     // Middle mouse button (wheel press) or Space + Left button
     if (e.button === 1 || (e.button === 0 && e.shiftKey)) {

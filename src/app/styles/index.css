@@ -1772,23 +1772,53 @@ textarea.field { min-height: 96px; resize: vertical; line-height: 1.45; }
   box-shadow: none;
 }
 
-/* Матрица комнат и гейтинг: полноэкранный режим без скролла страницы */
-.app-main:has(.view-content--matrix) {
-  padding-bottom: 0;
-  min-height: 100dvh;
-  height: 100dvh;
-  overflow: hidden;
-}
-
-.view-content.view-content--matrix {
+/* Матрица комнат и гейтинг */
+.matrix-layout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 350px;
+  gap: 14px;
   flex: 1;
   min-height: 0;
   height: 100%;
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
-  padding: 12px 18px;
-  box-sizing: border-box;
+}
+
+.matrix-map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.matrix-drawer-wrapper {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+@media (min-width: 901px) {
+  .app-main:has(.view-content--matrix) {
+    padding-bottom: 0;
+    min-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .view-content.view-content--matrix {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 12px 18px;
+    box-sizing: border-box;
+  }
+
+  .canvas-nav-mobile-help {
+    display: none !important;
+  }
 }
 
 /* Анимация бегущего лазера по нити при протягивании */
@@ -4994,6 +5024,58 @@ input, textarea, select { font-size: 16px; }
 
   .author-badge {
     padding: 4px 8px !important;
+  }
+
+  /* Matrix view on mobile: allow page scrolling, vertical layout */
+  .app-main:has(.view-content--matrix) {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(var(--mobile-nav-height) + 28px) !important;
+  }
+
+  .view-content.view-content--matrix {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    padding: 10px 12px 24px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .matrix-layout-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .matrix-map-wrapper {
+    position: relative !important;
+    width: 100% !important;
+    height: 480px !important;
+    min-height: 400px !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+  }
+
+  .matrix-drawer-wrapper {
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .canvas-nav-desktop-help {
+    display: none !important;
+  }
+
+  .canvas-nav-mobile-help {
+    display: flex !important;
   }
 }
 

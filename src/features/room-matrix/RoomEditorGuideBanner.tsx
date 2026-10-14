@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 export const RoomEditorGuideBanner: React.FC = () => {
   const [isOpen, setIsOpen] = useState(() => {
     try {
-      return localStorage.getItem('mv4_room_guide_open') !== 'false';
+      const saved = localStorage.getItem('mv4_room_guide_open');
+      if (saved !== null) return saved !== 'false';
+      return typeof window !== 'undefined' ? window.innerWidth > 768 : true;
     } catch {
-      return true;
+      return false;
     }
   });
 

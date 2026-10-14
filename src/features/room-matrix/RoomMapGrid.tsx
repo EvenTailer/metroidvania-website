@@ -292,20 +292,21 @@ export const RoomMapGrid: React.FC<RoomMapGridProps> = ({
   return (
     <div
       ref={containerRef}
+      className="room-map-canvas-container"
       onMouseDown={handlePanMouseDown}
       onDoubleClick={handleDoubleClick}
       style={{
         position: 'relative',
         width: '100%',
         height: '100%',
-        minHeight: '580px',
         overflow: 'hidden',
         background: 'radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.95) 0%, #070a12 100%)',
         border: '1px solid rgba(0, 210, 255, 0.25)',
         borderRadius: '12px',
         boxShadow: 'inset 0 0 45px rgba(0, 0, 0, 0.9)',
         cursor: isPanning ? 'grabbing' : dragRoom ? 'grabbing' : connecting ? 'crosshair' : 'default',
-        userSelect: 'none'
+        userSelect: 'none',
+        touchAction: 'none'
       }}
     >
       {/* Infinite Grid Background that moves with pan and scales with zoom */}
