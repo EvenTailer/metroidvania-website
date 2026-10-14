@@ -56,12 +56,12 @@ export const Topbar: React.FC<TopbarProps> = ({
   return (
     <header className="topbar">
       <div className="topbar-left">
-        <button className="mobile-menu-btn" onClick={onToggleSidebar}>
+        <button className="mobile-menu-btn" onClick={onToggleSidebar} aria-label="Открыть меню">
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <div>
+        <div className="topbar-title-wrap">
           <h2 className="topbar-title">{meta.title}</h2>
           <p className="topbar-subtitle">{meta.subtitle}</p>
         </div>
@@ -72,7 +72,7 @@ export const Topbar: React.FC<TopbarProps> = ({
         {onOpenCommandPalette && (
           <button
             type="button"
-            className="btn btn-secondary"
+            className="btn btn-secondary topbar-btn-search"
             onClick={onOpenCommandPalette}
             title="Открыть командную палитру поиска (Ctrl+K)"
             style={{
@@ -87,6 +87,7 @@ export const Topbar: React.FC<TopbarProps> = ({
             <span>🔍</span>
             <span className="topbar-search-label">Поиск</span>
             <kbd
+              className="topbar-kbd"
               style={{
                 fontSize: '9.5px',
                 fontFamily: 'monospace',
@@ -106,7 +107,7 @@ export const Topbar: React.FC<TopbarProps> = ({
         {onOpenGlossaryModal && (
           <button
             type="button"
-            className="btn btn-secondary"
+            className="btn btn-secondary topbar-btn-glossary"
             onClick={onOpenGlossaryModal}
             title="Справочник разработчика: понятно даже школьнику (клавиша G)"
             style={{ fontSize: '11.5px', padding: '5px 8px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
@@ -120,7 +121,7 @@ export const Topbar: React.FC<TopbarProps> = ({
         {onOpenHotkeysModal && (
           <button
             type="button"
-            className="btn btn-secondary"
+            className="btn btn-secondary topbar-btn-hotkeys"
             onClick={onOpenHotkeysModal}
             title="Шпаргалка горячих клавиш (клавиша ?)"
             style={{ fontSize: '11.5px', padding: '5px 8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
@@ -134,7 +135,7 @@ export const Topbar: React.FC<TopbarProps> = ({
         {onToggleSoundMute && (
           <button
             type="button"
-            className="icon-btn"
+            className="icon-btn topbar-btn-sound"
             onClick={onToggleSoundMute}
             title={isSoundMuted ? 'Включить звуковые эффекты (клавиша M)' : 'Выключить звуковые эффекты (клавиша M)'}
             style={{ fontSize: '13px', padding: '5px' }}
@@ -145,6 +146,7 @@ export const Topbar: React.FC<TopbarProps> = ({
 
         {/* Индикатор сети PWA */}
         <div
+          className="topbar-network-badge"
           title={isOnline ? 'Сеть подключена' : cacheReady ? 'Сети нет. Оболочка хаба открыта из кэша' : 'Сети нет. Кэш ещё не готов: откройте хаб онлайн один раз'}
           style={{
             display: 'flex',
@@ -176,7 +178,7 @@ export const Topbar: React.FC<TopbarProps> = ({
           <span className="author-name">{currentAuthor.name}</span>
         </div>
 
-        <button type="button" className="btn btn-cyan" onClick={onCopyContext} aria-label="Скопировать контекст для агента">
+        <button type="button" className="btn btn-cyan topbar-btn-context" onClick={onCopyContext} aria-label="Скопировать контекст для агента">
           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
           </svg>

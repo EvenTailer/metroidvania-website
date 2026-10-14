@@ -1512,7 +1512,15 @@ body {
   }
 }
 
-.topbar-title { font-size: 16px; font-weight: 800; color: #fff; line-height: 1.2; }
+.topbar-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .topbar-subtitle { font-size: 11px; color: var(--text-dim); }
 .author-name { font-weight: 600; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -3216,7 +3224,7 @@ input, textarea, select { font-size: 16px; }
     bottom: calc(var(--mobile-nav-height) + 8px);
     z-index: 5;
   }
-  .sprint-name, .topbar-title, .composer-title, .sprint-focus-title {
+  .sprint-name, .composer-title, .sprint-focus-title {
     overflow-wrap: anywhere;
   }
 
@@ -4927,12 +4935,84 @@ input, textarea, select { font-size: 16px; }
   color: #f8fafc;
 }
 
-/* Responsive Topbar Labels */
-@media (max-width: 640px) {
+/* Responsive Topbar */
+@media (max-width: 900px) {
+  .topbar {
+    padding: 8px 12px;
+    height: 56px;
+    min-height: 56px;
+    gap: 8px;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .topbar-title-wrap {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+
+  .topbar-title {
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topbar-right {
+    gap: 6px;
+    flex: 0 0 auto;
+  }
+
+  .topbar-btn-hotkeys,
+  .topbar-btn-glossary,
+  .topbar-kbd,
   .topbar-search-label,
   .topbar-help-label,
+  .topbar-copy-label,
+  .topbar-subtitle,
+  .author-name {
+    display: none !important;
+  }
+
+  .topbar-btn-search,
+  .topbar-btn-context,
+  .topbar-btn-sound {
+    padding: 6px 8px !important;
+    font-size: 13px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    justify-content: center !important;
+  }
+
+  .author-badge {
+    padding: 4px 8px !important;
+  }
+}
+
+@media (max-width: 640px) {
   .topbar-online-text {
-    display: none;
+    display: none !important;
+  }
+
+  .topbar-network-badge {
+    padding: 6px !important;
+    border-radius: 50% !important;
+    gap: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar-network-badge,
+  .topbar-btn-sound {
+    display: none !important;
   }
 }
 
