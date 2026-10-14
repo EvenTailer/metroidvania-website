@@ -1,0 +1,13 @@
+node_modules
+dist
+.DS_Store
+*.local
+.env
+.env.*
+.vite
+public/uploads/gallery/*
+!public/uploads/gallery/.gitkeep
+public/data/gallery.json
+public/data/board.json
+public/api/config.php
+.warden

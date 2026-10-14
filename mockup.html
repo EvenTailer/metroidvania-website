@@ -1,0 +1,2148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>CYBER-DUCK: Metroidvania Dev Studio & AI Agent Nexus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #06080e;
+      --bg-surface: #0b101c;
+      --bg-elevated: #111828;
+      --bg-card: #0f1626;
+      --border: #1d283e;
+      --border-bright: #2d3e60;
+      --border-focus: #00f2fe;
+      --border-glow: rgba(0, 242, 254, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent-cyan: #00f2fe;
+      --accent-cyan-glow: rgba(0, 242, 254, 0.25);
+      --accent-purple: #a855f7;
+      --accent-purple-glow: rgba(168, 85, 247, 0.25);
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --sidebar-width: 270px;
+      --topbar-height: 64px;
+      --mobile-nav-height: 68px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      position: relative;
+    }
+
+    /* CYBER-DUCK ATMOSPHERIC BACKGROUND */
+    #bg-artwork-layer {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        radial-gradient(circle at 80% 20%, rgba(0, 242, 254, 0.12) 0%, transparent 55%),
+        radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.12) 0%, transparent 55%),
+        linear-gradient(to bottom, rgba(6, 8, 14, 0.82), rgba(6, 8, 14, 0.94)),
+        url('assets/duck_hero.png');
+      background-size: cover, cover, cover, 1100px;
+      background-position: center, center, center, right -80px top 40px;
+      background-repeat: no-repeat;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.28;
+      mix-blend-mode: screen;
+      filter: contrast(110%);
+    }
+
+    /* GRID OVERLAY */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* 3-PASSWORD GATEKEEPER / AUTH SCREEN */
+    #auth-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 8, 14, 0.94);
+      backdrop-filter: blur(25px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-lg);
+      padding: 36px 30px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.85), 0 0 35px var(--accent-purple-glow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+    }
+
+    /* DUCK LOGO AVATAR */
+    .duck-avatar-logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background-image: url('assets/duck_hero.png');
+      background-size: 550%;
+      background-position: 8% 18%;
+      margin: 0 auto 16px;
+      border: 2px solid var(--accent-cyan);
+      box-shadow: 0 0 25px var(--accent-cyan-glow);
+      transition: transform 0.3s ease;
+    }
+    .duck-avatar-logo:hover {
+      transform: scale(1.06) rotate(3deg);
+    }
+
+    .auth-title {
+      font-family: 'Cinzel', serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .auth-subtitle {
+      font-size: 12px;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .auth-hint-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-align: left;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .auth-hint-box strong { color: #fff; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: rgba(11, 16, 28, 0.94);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 60;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .brand {
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-icon-duck {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background-image: url('assets/duck_hero.png');
+      background-size: 560%;
+      background-position: 8% 18%;
+      border: 2px solid var(--accent-cyan);
+      box-shadow: 0 0 16px var(--accent-cyan-glow);
+      flex-shrink: 0;
+    }
+
+    .brand-info h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 14.5px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+    }
+
+    .brand-info p {
+      font-size: 9.5px;
+      color: var(--accent-cyan);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-section-title {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-dim);
+      padding: 12px 10px 4px;
+      font-weight: 800;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 500;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .nav-item:hover { color: var(--text-main); background: var(--bg-elevated); }
+    .nav-item.active {
+      color: #fff;
+      background: linear-gradient(90deg, rgba(168, 85, 247, 0.25), rgba(0, 242, 254, 0.1));
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      font-weight: 600;
+    }
+
+    .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .sidebar-footer {
+      padding: 14px;
+      border-top: 1px solid var(--border);
+      background: rgba(8, 12, 20, 0.9);
+    }
+
+    /* MAIN CONTENT */
+    .app-main {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 2;
+      padding-bottom: 40px;
+    }
+
+    .topbar {
+      height: var(--topbar-height);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(11, 16, 28, 0.92);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .mobile-menu-btn {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    /* AUTHOR BADGE / TEAM SELECTOR */
+    .author-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-bright);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .author-badge:hover {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan-glow);
+    }
+
+    .author-avatar-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      color: #06080e;
+      font-weight: 800;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #a855f7, #00f2fe);
+      color: #06080e;
+      box-shadow: 0 0 14px var(--accent-purple-glow);
+    }
+    .btn-primary:hover { opacity: 0.95; transform: translateY(-1px); }
+
+    .btn-cyan {
+      background: rgba(0, 242, 254, 0.12);
+      border-color: rgba(0, 242, 254, 0.35);
+      color: var(--accent-cyan);
+    }
+    .btn-cyan:hover {
+      background: rgba(0, 242, 254, 0.2);
+      box-shadow: 0 0 14px var(--accent-cyan-glow);
+    }
+
+    .btn-secondary {
+      background: var(--bg-elevated);
+      border-color: var(--border-bright);
+      color: var(--text-main);
+    }
+    .btn-secondary:hover { background: var(--border); color: #fff; }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.12);
+      border-color: rgba(244, 63, 94, 0.3);
+      color: var(--accent-rose);
+    }
+
+    /* MIC BUTTON & RECORDING STATE */
+    .btn-mic {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-bright);
+      color: var(--accent-cyan);
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-mic:hover { border-color: var(--accent-cyan); }
+    .btn-mic.recording {
+      background: rgba(244, 63, 94, 0.25);
+      border-color: var(--accent-rose);
+      color: #fff;
+      animation: pulse-mic 1.2s infinite ease-in-out;
+      box-shadow: 0 0 16px rgba(244, 63, 94, 0.5);
+    }
+
+    @keyframes pulse-mic {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    /* VIEWS */
+    .view-container {
+      display: none;
+      padding: 24px;
+      animation: fadeIn 0.25s ease-out;
+    }
+    .view-container.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* PANELS */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    /* WEEKLY FOCUS & SPRINT BANNER (ANTI-BURNOUT) */
+    .sprint-banner {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(0, 242, 254, 0.08));
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .sprint-focus-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      color: var(--accent-cyan);
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+
+    .sprint-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .sprint-progress-bar {
+      width: 180px;
+      height: 7px;
+      background: var(--bg-surface);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 5px;
+      border: 1px solid var(--border);
+    }
+    .sprint-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+      border-radius: 999px;
+      width: 50%;
+      transition: width 0.3s;
+    }
+
+    /* HERO SHOWCASE CARD */
+    .hero-banner-card {
+      background: linear-gradient(135deg, rgba(15, 22, 38, 0.95), rgba(11, 16, 28, 0.95));
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 24px;
+      align-items: center;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-banner-card::before {
+      content: "";
+      position: absolute;
+      top: -50%; right: -20%; width: 350px; height: 350px;
+      background: radial-gradient(circle, var(--accent-cyan-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-turnaround-box {
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-md);
+      background: #060910;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+    .hero-turnaround-box img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.3s;
+    }
+    .hero-turnaround-box:hover img {
+      transform: scale(1.04);
+    }
+
+    /* KANBAN BOARD */
+    .kanban-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      min-height: 520px;
+    }
+
+    .kanban-col {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .kanban-col-head {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12.5px;
+      font-weight: 700;
+      background: rgba(17, 24, 40, 0.6);
+    }
+
+    .kanban-cards-box {
+      padding: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: 650px;
+    }
+
+    .kanban-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      cursor: grab;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .kanban-card:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    }
+    .kanban-card.dragging { opacity: 0.4; }
+
+    .card-tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+    .card-tag.code { background: rgba(0, 242, 254, 0.15); color: var(--accent-cyan); }
+    .card-tag.art { background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); }
+    .card-tag.design { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
+    .card-tag.audio { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); }
+
+    .card-author-pill {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-img-preview {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-top: 8px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    /* ROADMAP / CURRICULUM */
+    .roadmap-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .roadmap-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 90px 1fr auto;
+      gap: 18px;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .roadmap-card:hover { border-color: var(--border-bright); }
+    .roadmap-card.active-sprint {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 20px var(--accent-cyan-glow);
+      background: linear-gradient(90deg, rgba(0, 242, 254, 0.05), rgba(168, 85, 247, 0.05));
+    }
+    .roadmap-card.done {
+      border-color: rgba(16, 185, 129, 0.4);
+      opacity: 0.85;
+    }
+
+    .step-pill {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-align: center;
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    /* AI CHAT & NEXUS */
+    .ai-chat-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      min-height: 580px;
+    }
+
+    .chat-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 600px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .chat-bubble {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+    .chat-bubble.bot {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+    }
+    .chat-bubble.user {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(0, 242, 254, 0.2));
+      border: 1px solid rgba(0, 242, 254, 0.4);
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+
+    .chat-input-bar {
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(11, 16, 28, 0.95);
+    }
+
+    .chat-prompt-chips {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-surface);
+    }
+    .chip-btn {
+      font-size: 11px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 999px;
+      padding: 4px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .chip-btn:hover { color: #fff; border-color: var(--accent-cyan); }
+
+    /* IMAGE GALLERY & VAULT */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .gallery-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .gallery-item:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-2px);
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-item-title {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #fff;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* LIGHTBOX FOR IMAGES */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(12px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #lightbox img {
+      max-width: 92vw;
+      max-height: 88vh;
+      border-radius: 8px;
+      border: 1px solid var(--border-bright);
+      box-shadow: 0 0 50px rgba(0,0,0,0.9);
+    }
+
+    /* TOAST NOTIFICATION */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--accent-cyan);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px var(--accent-cyan-glow);
+      z-index: 99999;
+      display: none;
+      animation: toastSlide 0.25s ease-out;
+    }
+    @keyframes toastSlide { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .app-main { margin-left: 0; padding-bottom: calc(var(--mobile-nav-height) + 20px); }
+      .mobile-menu-btn { display: inline-flex; }
+      .kanban-grid { grid-template-columns: 1fr; }
+      .ai-chat-layout { grid-template-columns: 1fr; }
+      .hero-banner-card { grid-template-columns: 1fr; }
+      .roadmap-card { grid-template-columns: 1fr; }
+      .mobile-bottom-nav { display: block; }
+    }
+
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--mobile-nav-height);
+      background: rgba(11, 16, 28, 0.96);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      z-index: 50;
+    }
+
+    .mobile-nav-list {
+      display: flex;
+      height: 100%;
+      list-style: none;
+    }
+    .mobile-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 10px;
+      color: var(--text-dim);
+      cursor: pointer;
+    }
+    .mobile-nav-item.active { color: var(--accent-cyan); font-weight: 700; }
+    .mobile-nav-item svg { width: 20px; height: 20px; }
+  </style>
+</head>
+<body>
+
+  <!-- BACKGROUND ARTWORK WATERMARK -->
+  <div id="bg-artwork-layer"></div>
+
+  <!-- ==================== 1. GATEKEEPER AUTH (3 PASSWORDS) ==================== -->
+  <div id="auth-screen">
+    <div class="auth-card">
+      <div class="duck-avatar-logo"></div>
+      <h2 class="auth-title">CYBER-DUCK NEXUS</h2>
+      <p class="auth-subtitle">Командный хаб 2D Метроидвании</p>
+
+      <div class="auth-hint-box">
+        <strong>Пароли доступа для команды:</strong><br>
+        • <code>1111</code> (или <code>lead</code>) → <b>Илья (Lead / Code)</b><br>
+        • <code>2222</code> (или <code>art</code>) → <b>Художник (Art / Anim)</b><br>
+        • <code>3333</code> (или <code>design</code>) → <b>Геймдизайнер (Level / Lore)</b><br>
+        • <code>2026</code> → Мастер-пароль разработчика
+      </div>
+
+      <div style="display:flex; gap:8px; margin-bottom:14px;">
+        <input type="password" id="auth-password-input" class="btn btn-secondary" style="flex:1; text-align:center; font-size:16px; letter-spacing:2px;" placeholder="Введите пароль..." onkeydown="if(event.key==='Enter') verifyAccess()">
+        <button class="btn btn-primary" onclick="verifyAccess()">Войти →</button>
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:6px; flex-wrap:wrap;">
+        <button class="btn btn-secondary" style="font-size:10.5px; padding:5px 9px;" onclick="quickLogin(0)">🦆 Илья (Lead)</button>
+        <button class="btn btn-secondary" style="font-size:10.5px; padding:5px 9px;" onclick="quickLogin(1)">🎨 Художник</button>
+        <button class="btn btn-secondary" style="font-size:10.5px; padding:5px 9px;" onclick="quickLogin(2)">👾 Дизайнер</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 2. SIDEBAR ==================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon-duck"></div>
+      <div class="brand-info">
+        <h1>CYBER-DUCK</h1>
+        <p>DEV HUB & AGENT NEXUS</p>
+      </div>
+    </div>
+
+    <ul class="nav-list">
+      <li class="nav-section-title">Разработка игры</li>
+      <li class="nav-item active" data-view="dashboard">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        <span>Обзор проекта</span>
+      </li>
+      <li class="nav-item" data-view="curriculum">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        <span>Роадмап (0 → Steam)</span>
+        <span class="nav-badge" id="badge-steps">10 шагов</span>
+      </li>
+      <li class="nav-item" data-view="kanban">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/></svg>
+        <span>Канбан (Спринт недели)</span>
+        <span class="nav-badge" id="badge-kanban">4</span>
+      </li>
+      <li class="nav-item" data-view="hero">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        <span>Досье Кибер-Утки</span>
+      </li>
+      <li class="nav-item" data-view="gallery">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <span>Арт-хранилище & Картинки</span>
+      </li>
+      <li class="nav-item" data-view="notes">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        <span>Мысли & GDD (Голос)</span>
+      </li>
+
+      <li class="nav-section-title">ИИ Интеллект & Агенты</li>
+      <li class="nav-item" data-view="ai-chat">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+        <span>Встроенный ИИ-Чат</span>
+        <span class="nav-badge" style="color:var(--accent-emerald);">API</span>
+      </li>
+      <li class="nav-item" data-view="ai-export">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+        <span>AI Context / Export</span>
+      </li>
+      <li class="nav-item" data-view="fsd-spec">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        <span>React + FSD Карта</span>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div style="font-size:11px; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center;">
+        <span>Стек: Godot 4.3</span>
+        <button onclick="logout()" style="background:none; border:none; color:var(--accent-rose); cursor:pointer; font-size:11px;">Выйти</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== 3. APP MAIN ==================== -->
+  <main class="app-main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobile-toggle">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div>
+          <h2 id="view-title" style="font-size:16px; font-weight:800; color:#fff;">Обзор проекта</h2>
+          <p id="view-subtitle" style="font-size:11px; color:var(--text-dim);">Статус киберпанк-метроидвании</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Team Profile Selector -->
+        <div class="author-badge" onclick="cycleAuthor()" title="Кликните для смены роли">
+          <div class="author-avatar-dot" id="author-avatar">И</div>
+          <span id="author-label" style="font-weight:600;">Илья (Lead/Code)</span>
+        </div>
+
+        <button class="btn btn-cyan" onclick="copyContextForAgent()">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+          <span>Контекст для Агента</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="content-body">
+
+      <!-- ==================== VIEW: DASHBOARD ==================== -->
+      <section class="view-container active" id="view-dashboard">
+        
+        <!-- SPRINT WEEK BANNER -->
+        <div class="sprint-banner">
+          <div>
+            <div class="sprint-focus-title">🎯 Спринт текущей недели (Фокус без выгорания)</div>
+            <div class="sprint-name" id="sprint-banner-text">Шаг 1: Фундамент управления — Coyote Time (0.12с) и Jump Buffer (0.1с)</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div>
+              <div style="font-size:11px; color:var(--text-muted); text-align:right;" id="sprint-tasks-count">2 из 4 задач закрыто</div>
+              <div class="sprint-progress-bar"><div class="sprint-progress-fill" id="sprint-bar-fill" style="width: 50%;"></div></div>
+            </div>
+            <button class="btn btn-primary" onclick="switchView('kanban')">Открыть Канбан →</button>
+          </div>
+        </div>
+
+        <!-- HERO SHOWCASE BANNER -->
+        <div class="hero-banner-card">
+          <div class="hero-turnaround-box" onclick="openLightbox('assets/duck_hero.png')">
+            <img src="assets/duck_hero.png" alt="Кибер-Утка Turnaround A-Pose">
+            <div style="position:absolute; bottom:6px; right:6px; background:rgba(0,0,0,0.7); font-size:10px; padding:2px 6px; border-radius:4px; color:var(--accent-cyan);">🔍 Увеличить</div>
+          </div>
+          <div>
+            <span class="card-tag art">Главный Герой</span>
+            <h3 style="font-size:19px; color:#fff; font-weight:800; margin:4px 0 8px;">Агент-09: Кибер-Утка (Детектив-Наемник)</h3>
+            <p style="font-size:12.5px; color:var(--text-muted); line-height:1.55; margin-bottom:14px;">
+              Побитый жизнью сыщик в карго-штанах, старых кроссовках и грязной майке с армейским жетоном. Правая рука заменена на промышленный манипулятор для парирования и ударов, правый глаз — сенсорный нейро-имплант «Спектр».
+            </p>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              <span class="step-pill">🦾 Парирование пуль</span>
+              <span class="step-pill">👁 Спектральный глаз</span>
+              <span class="step-pill">👟 Рывок сквозь лазеры</span>
+              <span class="step-pill">🪝 Трос-гарпун</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK VOICE/TEXT THOUGHT RECORDER -->
+        <div class="panel" style="margin-bottom:24px;">
+          <h4 style="font-size:13.5px; color:#fff; margin-bottom:4px;">Быстрая запись идеи / заметки в GDD</h4>
+          <p style="font-size:11.5px; color:var(--text-muted); margin-bottom:12px;">Надиктуйте голосом с телефона или введите текст на ходу:</p>
+          <div style="display:flex; gap:8px;">
+            <select id="dash-thought-tag" class="btn btn-secondary" style="font-size:11px;">
+              <option value="💡 Механика">💡 Механика</option>
+              <option value="🎨 Арт/Анимация">🎨 Арт/Анимация</option>
+              <option value="🗺 Левел-дизайн">🗺 Левел-дизайн</option>
+              <option value="👾 Босс/Враг">👾 Босс/Враг</option>
+              <option value="🎵 Саунд/SFX">🎵 Саунд/SFX</option>
+            </select>
+            <input type="text" id="dash-thought-input" class="btn btn-secondary" style="flex:1; text-align:left;" placeholder="Например: звук парирования должен быть металлическим звоном с эхом...">
+            <button class="btn-mic" id="mic-dash-thought" onclick="toggleVoiceInput('dash-thought-input', 'mic-dash-thought')" title="Голосовой ввод">
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+            </button>
+            <button class="btn btn-primary" onclick="submitDashThought()">Записать</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ==================== VIEW: ROADMAP (0 -> STEAM) ==================== -->
+      <section class="view-container" id="view-curriculum">
+        <div style="margin-bottom:20px;">
+          <h3 style="font-size:17px; color:#fff;">Полная дорожная карта: от нуля до релиза в Steam</h3>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:3px;">
+            Каждый шаг детально структурирован. Нажмите <b>«🎯 Взять в спринт недели»</b>, чтобы разбить шаг на задачи для Канбана и спокойно работать без выгорания.
+          </p>
+        </div>
+
+        <div class="roadmap-list" id="curriculum-container">
+          <!-- Dynamic Steps rendered from JS -->
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: KANBAN (WEEKLY SPRINT) ==================== -->
+      <section class="view-container" id="view-kanban">
+        <!-- Sprint Focus Header -->
+        <div class="sprint-banner">
+          <div>
+            <div class="sprint-focus-title">📌 Текущий недельный сплит</div>
+            <div style="font-size:14px; font-weight:700; color:#fff;" id="kanban-sprint-heading">Шаг 1: Фундамент управления (Coyote Time & Jump Buffer)</div>
+            <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">
+              Правило: не более 3 задач в колонке «В работе» одновременно, чтобы сохранять фокус и высокое качество кода.
+            </div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary" onclick="openNewTaskModal()">+ Новая задача</button>
+          </div>
+        </div>
+
+        <!-- Kanban Grid -->
+        <div class="kanban-grid">
+          <!-- Backlog -->
+          <div class="kanban-col" ondragover="event.preventDefault()" ondrop="dropTask(event, 'backlog')">
+            <div class="kanban-col-head">
+              <span>План / Бэклог</span>
+              <span class="nav-badge" id="cnt-backlog">0</span>
+            </div>
+            <div class="kanban-cards-box" id="col-backlog"></div>
+          </div>
+
+          <!-- In Progress -->
+          <div class="kanban-col" ondragover="event.preventDefault()" ondrop="dropTask(event, 'in-progress')">
+            <div class="kanban-col-head" style="border-bottom-color:var(--accent-purple);">
+              <span style="color:var(--accent-purple);">В работе на этой неделе</span>
+              <span class="nav-badge" id="cnt-in-progress" style="color:var(--accent-purple);">0</span>
+            </div>
+            <div class="kanban-cards-box" id="col-in-progress"></div>
+          </div>
+
+          <!-- Test / Godot Playtest -->
+          <div class="kanban-col" ondragover="event.preventDefault()" ondrop="dropTask(event, 'test')">
+            <div class="kanban-col-head" style="border-bottom-color:var(--accent-amber);">
+              <span style="color:var(--accent-amber);">Тест в Godot 4</span>
+              <span class="nav-badge" id="cnt-test" style="color:var(--accent-amber);">0</span>
+            </div>
+            <div class="kanban-cards-box" id="col-test"></div>
+          </div>
+
+          <!-- Done -->
+          <div class="kanban-col" ondragover="event.preventDefault()" ondrop="dropTask(event, 'done')">
+            <div class="kanban-col-head" style="border-bottom-color:var(--accent-emerald);">
+              <span style="color:var(--accent-emerald);">Готово ✓</span>
+              <span class="nav-badge" id="cnt-done" style="color:var(--accent-emerald);">0</span>
+            </div>
+            <div class="kanban-cards-box" id="col-done"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: HERO DOSSIER ==================== -->
+      <section class="view-container" id="view-hero">
+        <div class="panel" style="margin-bottom:20px;">
+          <h3 style="font-size:16px; color:#fff; margin-bottom:6px;">Кибер-Утка: Анатомия способностей и гейтинг</h3>
+          <p style="font-size:12px; color:var(--text-muted);">
+            Каждая способность героя служит ключом к закрытым зонам карты (Классический Metroidvania Ability Gating).
+          </p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
+          <div class="panel">
+            <div style="font-size:14px; font-weight:700; color:var(--accent-cyan); margin-bottom:6px;">👁 Нейро-глаз «Спектр»</div>
+            <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+              <b>Механика:</b> Сканирование комнаты клавишей Q. Проявляет скрытые лазеры, невидимые платформы и трещины в стенах.<br>
+              <b>Гейт:</b> Снимает синие барьеры корпоративных лабораторий.
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="font-size:14px; font-weight:700; color:var(--accent-purple); margin-bottom:6px;">🦾 Кибер-рука с электроприводом</div>
+            <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+              <b>Механика:</b> Парирование пуль и ударов в тайминг 0.15с (как в Nine Sols). При контакте — Hitstop 0.08с и контрудар.<br>
+              <b>Гейт:</b> Силовым ударом выбивает бронированные гермодвери.
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="font-size:14px; font-weight:700; color:var(--accent-amber); margin-bottom:6px;">👟 Реактивные кроссовки (Dash)</div>
+            <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+              <b>Механика:</b> Мгновенный рывок вперед с фреймами неуязвимости (i-frames 0.2с).<br>
+              <b>Гейт:</b> Пролет сквозь фиолетовые лазерные решетки и кислотные ямы.
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="font-size:14px; font-weight:700; color:var(--accent-emerald); margin-bottom:6px;">🪝 Трос-гарпун (Grapple Hook)</div>
+            <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+              <b>Механика:</b> Выстрел тросом из запястья в неоновые точки подвеса на потолке с раскачкой.<br>
+              <b>Гейт:</b> Преодоление пропастей промышленных шахт.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: GALLERY / ART VAULT ==================== -->
+      <section class="view-container" id="view-gallery">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h3 style="font-size:16px; color:#fff;">Арт-хранилище и референсы (Сохранение картинок)</h3>
+            <p style="font-size:12px; color:var(--text-muted);">Загружайте спрайты, концепты, референсы из Nine Sols / Hollow Knight и баги.</p>
+          </div>
+          <div>
+            <input type="file" id="gallery-file-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+            <button class="btn btn-primary" onclick="document.getElementById('gallery-file-input').click()">+ Загрузить картинку</button>
+          </div>
+        </div>
+
+        <div class="gallery-grid" id="gallery-container">
+          <!-- Default items -->
+          <div class="gallery-item" onclick="openLightbox('assets/duck_hero.png')">
+            <img src="assets/duck_hero.png" alt="A-Pose 4 Views">
+            <div class="gallery-item-title">A-Pose: Кибер-Утка (4 ракурса)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: BUILT-IN AI CHAT ==================== -->
+      <section class="view-container" id="view-ai-chat">
+        <div class="ai-chat-layout">
+          <!-- Sidebar Settings -->
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div class="panel">
+              <h4 style="font-size:13px; color:#fff; margin-bottom:6px;">Провайдер ИИ</h4>
+              <select id="ai-provider-select" class="btn btn-secondary" style="width:100%; font-size:12px; margin-bottom:10px;" onchange="handleProviderChange()">
+                <option value="deepseek">DeepSeek (Бесплатный/дешевый)</option>
+                <option value="groq">Groq (Llama 3.3 / Ultra-Fast)</option>
+                <option value="openrouter">OpenRouter (Free tier)</option>
+                <option value="offline">Оффлайн Режим (База знаний)</option>
+              </select>
+
+              <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">API Ключ:</label>
+              <input type="password" id="ai-api-key-input" class="btn btn-secondary" style="width:100%; text-align:left; font-size:12px; margin-bottom:10px;" placeholder="Вставьте ключ sk-...">
+              <button class="btn btn-primary" style="width:100%; font-size:11px;" onclick="saveAiKey()">Сохранить ключ</button>
+            </div>
+
+            <div class="panel">
+              <h4 style="font-size:13px; color:#fff; margin-bottom:6px;">Режим диалога</h4>
+              <p style="font-size:11.5px; color:var(--text-muted); line-height:1.45;">
+                Встроенный агент держит в голове: физику Godot 4, Coyote Time, тайминги парирования, нарезку спрайтов для Skeleton2D и структуру метроидвании.
+              </p>
+            </div>
+          </div>
+
+          <!-- Chat Window -->
+          <div class="chat-box">
+            <div style="padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:13px; font-weight:700; color:#fff;">ИИ-Партнер по разработке</span>
+              <span style="font-size:11px; color:var(--accent-emerald);">● Активен</span>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+              <div class="chat-bubble bot">
+                Привет! Я твой ИИ-ассистент по разработке игры про Кибер-Утку. Можешь надиктовать вопрос через микрофон или написать текстом. На чем сейчас сфокусируемся: на коде Coyote Time, логике босса или нарезке костей Skeleton2D?
+              </div>
+            </div>
+
+            <!-- Chips -->
+            <div class="chat-prompt-chips">
+              <button class="chip-btn" onclick="sendQuickPrompt('Напиши точный скрипт движения CharacterBody2D с Coyote Time (0.12s) и Jump Buffer (0.10s) на GDScript Godot 4')">Код Coyote Time</button>
+              <button class="chip-btn" onclick="sendQuickPrompt('Как нарезать A-позу утки на слои и привязать к Skeleton2D в Godot 4?')">Пайплайн Skeleton2D</button>
+              <button class="chip-btn" onclick="sendQuickPrompt('Придумай 3 фазы для первого босса Страж Сектора с телеграфированием атак')">Фазы Босса</button>
+              <button class="chip-btn" onclick="sendQuickPrompt('Как сделать шейдер Hitstop (0.08с замирания) и вспышку белым при ударе?')">Шейдер Hitstop</button>
+            </div>
+
+            <!-- Input Bar with Voice -->
+            <div class="chat-input-bar">
+              <input type="text" id="chat-user-input" class="btn btn-secondary" style="flex:1; text-align:left; background:var(--bg-surface);" placeholder="Спросить о коде, дизайне, балансе..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+              <button class="btn-mic" id="mic-chat" onclick="toggleVoiceInput('chat-user-input', 'mic-chat')" title="Голосовой ввод">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+              </button>
+              <button class="btn btn-primary" onclick="sendChatMessage()">Отправить</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: AI CONTEXT & GDD EXPORT ==================== -->
+      <section class="view-container" id="view-ai-export">
+        <div style="margin-bottom:20px;">
+          <h3 style="font-size:16px; color:#fff;">Единый файл контекста для внешних агентов (Cursor / Grok / Claude)</h3>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:3px;">
+            Этот генератор формирует полный актуальный слепок игры: лор персонажа, активный шаг роадмапа, задачи канбана, физику управления и архитектуру.
+          </p>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="copyContextForAgent()">📋 Скопировать Markdown для Cursor / Grok</button>
+          <button class="btn btn-secondary" onclick="downloadContextFile()">💾 Скачать PROJECT_CONTEXT.md</button>
+          <button class="btn btn-cyan" onclick="copyContextJson()">📦 Скопировать context.json</button>
+        </div>
+
+        <div class="panel">
+          <pre id="context-preview-box" style="font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-muted); white-space:pre-wrap; max-height:480px; overflow-y:auto; line-height:1.6;"></pre>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: FSD SPEC ==================== -->
+      <section class="view-container" id="view-fsd-spec">
+        <div style="margin-bottom:20px;">
+          <h3 style="font-size:16px; color:#fff;">Feature-Sliced Design (FSD) Спецификация для React</h3>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:3px;">
+            Структура будущего React-приложения (Vite + TypeScript) с разделением ответственности по слоям:
+          </p>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="panel" style="border-left:4px solid #38bdf8;">
+            <div style="font-weight:700; color:#38bdf8; font-size:13px;">app/ (Инициализация)</div>
+            <div style="font-size:12px; color:var(--text-muted);">Провайдеры тем, глобальные стили, роутер, авторизация по 3 паролям, IndexedDB хранилище картинок.</div>
+          </div>
+          <div class="panel" style="border-left:4px solid #818cf8;">
+            <div style="font-weight:700; color:#818cf8; font-size:13px;">pages/ (Страницы)</div>
+            <div style="font-size:12px; color:var(--text-muted);">DashboardPage, CurriculumPage, KanbanPage, HeroDossierPage, AiChatPage, GalleryVaultPage.</div>
+          </div>
+          <div class="panel" style="border-left:4px solid #c084fc;">
+            <div style="font-weight:700; color:#c084fc; font-size:13px;">widgets/ (Виджеты)</div>
+            <div style="font-size:12px; color:var(--text-muted);">SprintFocusBar, KanbanBoardWithDragDrop, AiChatWidget, ImageGalleryGrid, TopBarWithAuthor.</div>
+          </div>
+          <div class="panel" style="border-left:4px solid #34d399;">
+            <div style="font-weight:700; color:#34d399; font-size:13px;">features/ (Действия)</div>
+            <div style="font-size:12px; color:var(--text-muted);">voice-recording, split-step-to-sprint, upload-image-attachment, export-agent-context, auth-by-password.</div>
+          </div>
+          <div class="panel" style="border-left:4px solid #fbbf24;">
+            <div style="font-weight:700; color:#fbbf24; font-size:13px;">entities/ (Сущности)</div>
+            <div style="font-size:12px; color:var(--text-muted);">task (модель задачи), roadmap-step (шаг обучения), duck-implant (способность), author (член команды).</div>
+          </div>
+          <div class="panel" style="border-left:4px solid #94a3b8;">
+            <div style="font-weight:700; color:#94a3b8; font-size:13px;">shared/ (UI Kit & Utils)</div>
+            <div style="font-size:12px; color:var(--text-muted);">Базовые кнопки, модалки, SpeechRecognition API обертка, DeepSeek/Groq API клиент.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: NOTES ==================== -->
+      <section class="view-container" id="view-notes">
+        <div style="max-width:820px;">
+          <h3 style="font-size:16px; color:#fff; margin-bottom:14px;">Лента мыслей и GDD (с голосовым вводом)</h3>
+          <div id="notes-stream-box" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ==================== MOBILE NAV ==================== -->
+  <nav class="mobile-bottom-nav">
+    <ul class="mobile-nav-list">
+      <li class="mobile-nav-item active" data-view="dashboard">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+        <span>Обзор</span>
+      </li>
+      <li class="mobile-nav-item" data-view="curriculum">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        <span>Роадмап</span>
+      </li>
+      <li class="mobile-nav-item" data-view="kanban">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/></svg>
+        <span>Канбан</span>
+      </li>
+      <li class="mobile-nav-item" data-view="ai-chat">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+        <span>ИИ-Чат</span>
+      </li>
+      <li class="mobile-nav-item" data-view="gallery">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <span>Арт</span>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- LIGHTBOX MODAL -->
+  <div id="lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="Enlarged Preview">
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    // 1. TEAM AUTHORS & 3-PASSWORD AUTH
+    const AUTHORS = [
+      { id: "ilya", name: "Илья (Lead/Code)", role: "Lead / Game Director", avatar: "И" },
+      { id: "artist", name: "Художник (Art/Anim)", role: "2D Artist & Animator", avatar: "Х" },
+      { id: "designer", name: "Геймдизайнер (Level/Lore)", role: "Level Designer", avatar: "Г" }
+    ];
+    let currentAuthorIndex = 0;
+
+    function quickLogin(idx) {
+      currentAuthorIndex = idx;
+      sessionStorage.setItem("mv_auth_ok", "true");
+      sessionStorage.setItem("mv_author_idx", idx);
+      updateAuthorUI();
+      document.getElementById("auth-screen").style.display = "none";
+      showToast(`Добро пожаловать, ${AUTHORS[idx].name}!`);
+    }
+
+    function verifyAccess() {
+      const pass = document.getElementById("auth-password-input").value.trim().toLowerCase();
+      let matchedIndex = -1;
+
+      if (pass === "1111" || pass === "lead" || pass === "ilya") {
+        matchedIndex = 0;
+      } else if (pass === "2222" || pass === "art" || pass === "artist") {
+        matchedIndex = 1;
+      } else if (pass === "3333" || pass === "design" || pass === "designer") {
+        matchedIndex = 2;
+      } else if (pass === "2026" || pass === "admin") {
+        matchedIndex = 0; // default admin
+      }
+
+      if (matchedIndex !== -1) {
+        currentAuthorIndex = matchedIndex;
+        sessionStorage.setItem("mv_auth_ok", "true");
+        sessionStorage.setItem("mv_author_idx", matchedIndex);
+        updateAuthorUI();
+        document.getElementById("auth-screen").style.display = "none";
+        showToast(`Добро пожаловать, ${AUTHORS[matchedIndex].name}!`);
+      } else {
+        alert("Неверный пароль. Используйте 1111 (Илья), 2222 (Художник) или 3333 (Геймдизайнер)");
+      }
+    }
+
+    function checkAuth() {
+      if (sessionStorage.getItem("mv_auth_ok") === "true") {
+        document.getElementById("auth-screen").style.display = "none";
+        const savedIdx = sessionStorage.getItem("mv_author_idx");
+        if (savedIdx !== null) {
+          currentAuthorIndex = parseInt(savedIdx, 10) || 0;
+          updateAuthorUI();
+        }
+      }
+    }
+
+    function logout() {
+      sessionStorage.removeItem("mv_auth_ok");
+      sessionStorage.removeItem("mv_author_idx");
+      location.reload();
+    }
+
+    function cycleAuthor() {
+      currentAuthorIndex = (currentAuthorIndex + 1) % AUTHORS.length;
+      sessionStorage.setItem("mv_author_idx", currentAuthorIndex);
+      updateAuthorUI();
+      showToast(`Текущий автор: ${AUTHORS[currentAuthorIndex].name}`);
+    }
+
+    function updateAuthorUI() {
+      const a = AUTHORS[currentAuthorIndex];
+      document.getElementById("author-avatar").innerText = a.avatar;
+      document.getElementById("author-label").innerText = a.name;
+    }
+
+    // 2. COMPLETE ROADMAP (0 -> STEAM RELEASE)
+    const ROADMAP = [
+      {
+        id: "step-0",
+        phase: "Фаза 0 • Инфраструктура",
+        title: "Установка Godot 4.3+, Git и базовый сетап проекта",
+        desc: "Скачивание Godot 4.x (Standard 2D), инициализация Git-репозитория, настройка Pixel Snap (чтобы пиксели не дрожали) и раскладка управления (Input Map: WASD, Space, J, K, Shift).",
+        tech: "Godot 4.3 • Git • InputMap",
+        done: true,
+        subtasks: [
+          "Скачать и запустить Godot 4.3 (официальный билд)",
+          "Создать 2D сцену Main с настройкой Project Settings -> Display -> Stretch -> Mode: Canvas_Items",
+          "Задать кнопки управления в Project -> Project Settings -> Input Map"
+        ]
+      },
+      {
+        id: "step-1",
+        phase: "Фаза 1 • Физика и Greyboxing",
+        title: "2D Контроллер движения, Coyote Time и Jump Buffer",
+        desc: "Создание CharacterBody2D. Реализация отзывчивого прыжка: 0.12с Coyote Time (прощение схода с обрыва), 0.10с Jump Buffer (запоминание клика прыжка в воздухе), быстрая гравитация падения. Тестовый уровень из серых блоков.",
+        tech: "CharacterBody2D • move_and_slide • Game Feel",
+        done: false,
+        subtasks: [
+          "Скрипт CharacterBody2D с ускорением и трением",
+          "Таймер Coyote Time (0.12с) при сходе с платформы",
+          "Таймер Jump Buffer (0.10с) при раннем нажатии Space",
+          "Грейбокс тестовой комнаты с платформами разной высоты"
+        ]
+      },
+      {
+        id: "step-2",
+        phase: "Фаза 2 • Арт & Скелетная Анимация",
+        title: "Нарезка A-позы Кибер-Утки и Skeleton2D в Godot",
+        desc: "Нарезка слоев A-позы (голова, клюв с глазом, туловище, кибер-рука, ноги). Сборка 2D костей (Skeleton2D + Bone2D), настройка анимаций в AnimationPlayer: дыхание (Idle), бег (Run), прыжок/падение (Jump/Fall).",
+        tech: "Aseprite / Photoshop • Skeleton2D • AnimationPlayer",
+        done: false,
+        subtasks: [
+          "Экспорт слоев утки из PSD/PNG в отдельные спрайты",
+          "Создание иерархии Bone2D в сцене Player",
+          "Анимация покоя Idle (легкое покачивание торса и клюва)",
+          "Анимация бега Run (60 FPS без покадровой перерисовки)"
+        ]
+      },
+      {
+        id: "step-3",
+        phase: "Фаза 3 • Боевая система и Импакт",
+        title: "Хитбоксы, Парирование кибер-рукой и Hitstop",
+        desc: "Система атак кибер-рукой. Area2D хитбоксы и хёртбоксы. Парирование пуль в окно 0.15с (как в Nine Sols). Game Feel: замирание кадра на 0.08с (Engine.time_scale), вспышка белым (Flash Shader), тряска камеры с затуханием (Camera2D).",
+        tech: "Area2D • Hitstop 0.08s • Screen Shake • Shaders",
+        done: false,
+        subtasks: [
+          "State Machine: Move, Attack, Parry, Hurt, Stun",
+          "Механика парирования (окно 0.15с) с отражением снарядов",
+          "Функция hitstop(0.08) с замедлением Engine.time_scale",
+          "Шейдер вспышки белым при получении урона врагом"
+        ]
+      },
+      {
+        id: "step-4",
+        phase: "Фаза 4 • Способности и Гейтинг",
+        title: "Рывок (Dash) с i-frames и Нейро-глаз «Спектр»",
+        desc: "Рывок в кроссовках на Shift с неуязвимостью (i-frames 0.2с) сквозь врагов и лазеры. Нейро-глаз на Q, открывающий спектральный шейдер ночного видения для обнаружения невидимых платформ и проходов.",
+        tech: "Metroidvania Gating • RayCast2D • Post-processing",
+        done: false,
+        subtasks: [
+          "Скрипт Dash с физикой рывка и полупрозрачным шлейфом",
+          "Коллизия лазерного барьера (пропускает только при Dash)",
+          "Шейдер сканера «Спектр» с подсветкой скрытых тайлов"
+        ]
+      },
+      {
+        id: "step-5",
+        phase: "Фаза 5 • Враги и Первый Босс",
+        title: "ИИ противников и 3-фазный босс «Страж Сектора 09»",
+        desc: "Патрульные дроны и кибер-крысы (RayCast2D обнаружение краев). Первый босс: фаза 1 (серия ударов), фаза 2 (прыжки и ударная волна по полу), фаза 3 (пулеметная очередь под парирование). Четкое телеграфирование атак.",
+        tech: "FSM AI • RayCast2D • Boss Behavior",
+        done: false,
+        subtasks: [
+          "Базовый класс Enemy с хитпоинтами и анимацией получения урона",
+          "ИИ босса с таймингами замаха (телеграфирование красным)",
+          "Арена босса с закрывающимися воротами на время битвы"
+        ]
+      },
+      {
+        id: "step-6",
+        phase: "Фаза 6 • Левел-дизайн и Неоновый свет",
+        title: "Постройка уровней, 2D Освещение и Параллакс",
+        desc: "Сборка киберпанк-трущоб и неоновых лабораторий через TileMapLayer. 3-4 слоя фона ParallaxBackground с разной скоростью скролла. 2D свет PointLight2D и DirectionalLight2D, неоновые вывески, частицы пыли/дождя.",
+        tech: "TileMapLayer • PointLight2D • ParallaxBackground",
+        done: false,
+        subtasks: [
+          "Настройка тайлсета киберпанк-города с автотайлингом",
+          "Создание многослойного параллакса с силуэтами небоскребов",
+          "Размещение источников света и частиц тумана/искр"
+        ]
+      },
+      {
+        id: "step-7",
+        phase: "Фаза 7 • Звук и Интерактивная Музыка",
+        title: "Саунд-дизайн ударов, парирования и Синтвейв",
+        desc: "Настройка шин AudioServer (Master, SFX, Music, UI). Подбор и сведение звуков: металлический лязг парирования, глухой удар руки, гул лазеров. Адаптивный саундтрек: спокойный эмбиент переключается на боевой драйв в бою.",
+        tech: "AudioStreamPlayer2D • AudioServer • Sound Design",
+        done: false,
+        subtasks: [
+          "Шины звука в AudioServer с эффектом реверберации",
+          "Интеграция звука идеального парирования (звонкий clang)",
+          "Кроссфейд музыки при входе на арену босса"
+        ]
+      },
+      {
+        id: "step-8",
+        phase: "Фаза 8 • Vertical Slice (15-мин Демо)",
+        title: "Интерфейс игрока (HUD), Меню паузы и Плейтесты",
+        desc: "Полоска здоровья Кибер-Утки в виде шкалы заряда импланта, счетчик энерго-ячеек, карта комнат, экран смерти и респаун на чекпоинтах. Сборка стабильного билда и тестирование на друзьях/игроках.",
+        tech: "Control UI • Save/Load • Playtesting",
+        done: false,
+        subtasks: [
+          "HUD здоровья и энергии на Control узлах Godot",
+          "Система чекпоинтов и перезагрузки сцены при гибели",
+          "Запись сессий плейтеста и сбор правок баланса"
+        ]
+      },
+      {
+        id: "step-9",
+        phase: "Фаза 9 • Steamworks и Страница в Магазине",
+        title: "Капсулы арта, Трейлер и Запуск Steam страницы",
+        desc: "Регистрация в Steamworks, подключение библиотеки GodotSteam (достижения, оверлей). Отрисовка капсул арта (Header Capsule, Main Capsule, Vertical Capsule). Запуск страницы Coming Soon для сбора вишлистов за 6-9 месяцев до релиза.",
+        tech: "GodotSteam • Steamworks • Capsule Art",
+        done: false,
+        subtasks: [
+          "Подготовка артов всех размеров капсул Steam",
+          "Запись 60-секундного динамичного геймплейного тизера",
+          "Прохождение ревью Steamworks и запуск сбора вишлистов"
+        ]
+      },
+      {
+        id: "step-10",
+        phase: "Фаза 10 • Оптимизация, Локализация и Релиз",
+        title: "60 FPS на Steam Deck, перевод (RU/EN) и Steam Next Fest",
+        desc: "Профилирование памяти и кадров. Поддержка геймпадов (Xbox, PlayStation, Steam Deck) через Steam Input. Таблицы локализации CSV. Участие в фестивале демок Steam Next Fest и релиз полной версии игры.",
+        tech: "Steam Deck 60 FPS • Localization • Release",
+        done: false,
+        subtasks: [
+          "Тестирование на слабом железе и Steam Deck",
+          "Перевод текста диалогов и интерфейса на EN/RU",
+          "Участие в Steam Next Fest -> Финальный релиз!"
+        ]
+      }
+    ];
+
+    let currentSprintStepId = "step-1";
+
+    function renderCurriculum() {
+      const container = document.getElementById("curriculum-container");
+      container.innerHTML = "";
+
+      ROADMAP.forEach(step => {
+        const isCurrent = (step.id === currentSprintStepId);
+        const card = document.createElement("div");
+        card.className = `roadmap-card ${isCurrent ? 'active-sprint' : ''} ${step.done ? 'done' : ''}`;
+        
+        card.innerHTML = `
+          <div>
+            <div class="step-pill">${step.id.toUpperCase()}</div>
+            <div style="font-size:10px; color:${step.done ? 'var(--accent-emerald)' : isCurrent ? 'var(--accent-cyan)' : 'var(--text-dim)'}; margin-top:6px; font-weight:700; text-align:center;">
+              ${step.done ? '✓ Выполнен' : isCurrent ? '⚡ В спринте' : 'В очереди'}
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:11px; color:var(--accent-purple); font-weight:700; text-transform:uppercase; letter-spacing:1px;">${step.phase}</div>
+            <h4 style="font-size:14.5px; color:#fff; font-weight:700; margin:3px 0 6px;">${step.title}</h4>
+            <p style="font-size:12px; color:var(--text-muted); line-height:1.5; margin-bottom:8px;">${step.desc}</p>
+            <div style="font-size:11px; color:var(--accent-cyan); font-family:'JetBrains Mono', monospace;">${step.tech}</div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+            <button class="btn ${isCurrent ? 'btn-cyan' : 'btn-primary'}" style="font-size:11px;" onclick="setSprintStep('${step.id}')">
+              ${isCurrent ? '🎯 Текущий спринт' : '🎯 Взять в спринт недели'}
+            </button>
+            <button class="btn btn-secondary" style="font-size:11px;" onclick="pushAllSubtasksToKanban('${step.id}')">
+              + Разбить на задачи
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      document.getElementById("badge-steps").innerText = ROADMAP.length + " шагов";
+    }
+
+    function setSprintStep(stepId) {
+      currentSprintStepId = stepId;
+      const step = ROADMAP.find(s => s.id === stepId);
+      if (step) {
+        document.getElementById("sprint-banner-text").innerText = `${step.id.toUpperCase()}: ${step.title}`;
+        document.getElementById("kanban-sprint-heading").innerText = `${step.id.toUpperCase()}: ${step.title}`;
+        renderCurriculum();
+        showToast(`Шаг ${step.id.toUpperCase()} взят в фокус недели!`);
+      }
+    }
+
+    function pushAllSubtasksToKanban(stepId) {
+      const step = ROADMAP.find(s => s.id === stepId);
+      if (!step) return;
+
+      step.subtasks.forEach(sub => {
+        tasks.unshift({
+          id: "t-" + Date.now() + Math.random().toString(36).substr(2, 4),
+          title: sub,
+          category: "code",
+          status: "backlog",
+          author: AUTHORS[currentAuthorIndex].name,
+          stepId: step.id
+        });
+      });
+      saveTasks();
+      switchView("kanban");
+      showToast(`Задачи шага ${step.id.toUpperCase()} добавлены в Канбан!`);
+    }
+
+    // 3. KANBAN DATA & WEEKLY SPRINT LOGIC
+    let tasks = JSON.parse(localStorage.getItem("mv4_tasks")) || [
+      { id: "t-1", title: "Настройка таймера Coyote Time (0.12с) в Godot 4", category: "code", status: "done", author: "Илья (Lead/Code)", stepId: "step-1" },
+      { id: "t-2", title: "Jump Buffer (0.10с) для отзывчивого прыжка", category: "code", status: "in-progress", author: "Илья (Lead/Code)", stepId: "step-1" },
+      { id: "t-3", title: "Нарезка спрайтов утки на части для Skeleton2D", category: "art", status: "in-progress", author: "Художник (Art/Anim)", stepId: "step-2" },
+      { id: "t-4", title: "Грейбокс тестовой комнаты с платформами", category: "design", status: "backlog", author: "Геймдизайнер (Level/Lore)", stepId: "step-1" }
+    ];
+
+    function saveTasks() {
+      localStorage.setItem("mv4_tasks", JSON.stringify(tasks));
+      renderKanban();
+      updateSprintProgress();
+    }
+
+    function renderKanban() {
+      const cols = {
+        backlog: document.getElementById("col-backlog"),
+        "in-progress": document.getElementById("col-in-progress"),
+        test: document.getElementById("col-test"),
+        done: document.getElementById("col-done")
+      };
+      Object.values(cols).forEach(col => col.innerHTML = "");
+      const cnt = { backlog: 0, "in-progress": 0, test: 0, done: 0 };
+
+      tasks.forEach(t => {
+        cnt[t.status] = (cnt[t.status] || 0) + 1;
+        const card = document.createElement("div");
+        card.className = "kanban-card";
+        card.draggable = true;
+
+        const catClass = t.category || 'code';
+        const imgHtml = t.image ? `<img src="${t.image}" class="card-img-preview" onclick="openLightbox('${t.image}')">` : '';
+
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <span class="card-tag ${catClass}">${catClass}</span>
+            <button onclick="deleteTask('${t.id}')" style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:12px;">✕</button>
+          </div>
+          <div style="font-size:12.5px; font-weight:600; color:#fff; margin:4px 0 8px;">${escapeHtml(t.title)}</div>
+          ${imgHtml}
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+            <span class="card-author-pill">👤 ${escapeHtml(t.author || 'Илья')}</span>
+            <label style="cursor:pointer; font-size:11px; color:var(--text-dim);" title="Прикрепить картинку к задаче">
+              📎
+              <input type="file" accept="image/*" style="display:none;" onchange="attachImageToTask(event, '${t.id}')">
+            </label>
+          </div>
+        `;
+
+        card.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", t.id);
+          card.classList.add("dragging");
+        });
+        card.addEventListener("dragend", () => card.classList.remove("dragging"));
+
+        if (cols[t.status]) cols[t.status].appendChild(card);
+      });
+
+      document.getElementById("cnt-backlog").innerText = cnt.backlog;
+      document.getElementById("cnt-in-progress").innerText = cnt["in-progress"];
+      document.getElementById("cnt-test").innerText = cnt.test;
+      document.getElementById("cnt-done").innerText = cnt.done;
+      document.getElementById("badge-kanban").innerText = cnt["in-progress"] + cnt.backlog;
+    }
+
+    function dropTask(e, status) {
+      e.preventDefault();
+      const id = e.dataTransfer.getData("text/plain");
+      const t = tasks.find(item => item.id === id);
+      if (t) {
+        t.status = status;
+        saveTasks();
+        showToast(`Статус задачи обновлен: ${status}`);
+      }
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      saveTasks();
+      showToast("Задача удалена");
+    }
+
+    function openNewTaskModal() {
+      const title = prompt("Название новой задачи разработки:");
+      if (!title) return;
+      const cat = prompt("Категория (code, art, design, audio):", "code") || "code";
+
+      tasks.unshift({
+        id: "t-" + Date.now(),
+        title,
+        category: cat.toLowerCase(),
+        status: "backlog",
+        author: AUTHORS[currentAuthorIndex].name,
+        stepId: currentSprintStepId
+      });
+      saveTasks();
+      showToast("Задача добавлена в бэклог");
+    }
+
+    function attachImageToTask(e, taskId) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const t = tasks.find(item => item.id === taskId);
+        if (t) {
+          t.image = evt.target.result;
+          saveTasks();
+          showToast("Картинка прикреплена к задаче!");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateSprintProgress() {
+      const total = tasks.length || 1;
+      const done = tasks.filter(t => t.status === "done").length;
+      const pct = Math.round((done / total) * 100);
+
+      const countEl = document.getElementById("sprint-tasks-count");
+      const fillEl = document.getElementById("sprint-bar-fill");
+      if (countEl) countEl.innerText = `${done} из ${total} задач закрыто`;
+      if (fillEl) fillEl.style.width = pct + "%";
+    }
+
+    // 4. IMAGE GALLERY & REF VAULT
+    let galleryImages = JSON.parse(localStorage.getItem("mv4_gallery")) || [
+      { id: "g-1", title: "A-Pose: Кибер-Утка (4 ракурса)", url: "assets/duck_hero.png" }
+    ];
+
+    function renderGallery() {
+      const container = document.getElementById("gallery-container");
+      container.innerHTML = "";
+      galleryImages.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "gallery-item";
+        div.innerHTML = `
+          <img src="${item.url}" alt="${escapeHtml(item.title)}" onclick="openLightbox('${item.url}')">
+          <div class="gallery-item-title">${escapeHtml(item.title)}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function handleImageUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const title = prompt("Название референса / арта:", file.name) || "Новый арт";
+        galleryImages.unshift({
+          id: "g-" + Date.now(),
+          title,
+          url: evt.target.result
+        });
+        localStorage.setItem("mv4_gallery", JSON.stringify(galleryImages));
+        renderGallery();
+        showToast("Картинка сохранена в галерею!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function openLightbox(url) {
+      const lb = document.getElementById("lightbox");
+      const img = document.getElementById("lightbox-img");
+      img.src = url;
+      lb.style.display = "flex";
+    }
+
+    function closeLightbox() {
+      document.getElementById("lightbox").style.display = "none";
+    }
+
+    // 5. VOICE INPUT (WEB SPEECH API)
+    let recognition = null;
+    let activeMicButtonId = null;
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRec();
+      recognition.lang = 'ru-RU';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        if (window._currentVoiceTargetId) {
+          const target = document.getElementById(window._currentVoiceTargetId);
+          if (target) {
+            target.value = (target.value ? target.value + " " : "") + transcript;
+            showToast("Голос распознан: " + transcript);
+          }
+        }
+        stopVoiceRecording();
+      };
+
+      recognition.onerror = function() {
+        stopVoiceRecording();
+        showToast("Ошибка голосового ввода или доступ запрещен");
+      };
+
+      recognition.onend = function() {
+        stopVoiceRecording();
+      };
+    }
+
+    function toggleVoiceInput(targetInputId, micButtonId) {
+      if (!recognition) {
+        alert("Голосовой ввод не поддерживается данным браузером. Рекомендуется использовать Chrome, Edge или Safari.");
+        return;
+      }
+
+      if (activeMicButtonId) {
+        recognition.stop();
+        stopVoiceRecording();
+      } else {
+        window._currentVoiceTargetId = targetInputId;
+        activeMicButtonId = micButtonId;
+        const btn = document.getElementById(micButtonId);
+        if (btn) btn.classList.add("recording");
+        showToast("Слушаю... Говорите в микрофон");
+        try {
+          recognition.start();
+        } catch(e) {
+          stopVoiceRecording();
+        }
+      }
+    }
+
+    function stopVoiceRecording() {
+      if (activeMicButtonId) {
+        const btn = document.getElementById(activeMicButtonId);
+        if (btn) btn.classList.remove("recording");
+        activeMicButtonId = null;
+      }
+    }
+
+    // 6. GDD NOTES
+    let notes = JSON.parse(localStorage.getItem("mv4_notes")) || [
+      { id: "n-1", tag: "💡 Механика", text: "Парирование рукой-протезом заряжает кибер-глаз: после 3 парирований игрок выпускает сканирующий импульс.", author: "Илья (Lead/Code)", date: "Сегодня" }
+    ];
+
+    function renderNotes() {
+      const box = document.getElementById("notes-stream-box");
+      box.innerHTML = "";
+      notes.forEach(n => {
+        const d = document.createElement("div");
+        d.className = "panel";
+        d.innerHTML = `
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-dim); margin-bottom:6px;">
+            <span style="color:var(--accent-purple); font-weight:700;">${escapeHtml(n.tag)} • ${escapeHtml(n.author || 'Илья')}</span>
+            <span>${escapeHtml(n.date || 'Сегодня')}</span>
+          </div>
+          <div style="font-size:13px; color:#fff; line-height:1.5;">${escapeHtml(n.text)}</div>
+        `;
+        box.appendChild(d);
+      });
+    }
+
+    function submitDashThought() {
+      const input = document.getElementById("dash-thought-input");
+      const tag = document.getElementById("dash-thought-tag").value;
+      const text = input.value.trim();
+      if (!text) return;
+
+      notes.unshift({
+        id: "n-" + Date.now(),
+        tag,
+        text,
+        author: AUTHORS[currentAuthorIndex].name,
+        date: "Сегодня, " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      localStorage.setItem("mv4_notes", JSON.stringify(notes));
+      input.value = "";
+      renderNotes();
+      showToast("Мысль сохранена в GDD");
+    }
+
+    // 7. BUILT-IN AI CHAT
+    function handleProviderChange() {
+      const prov = document.getElementById("ai-provider-select").value;
+      const keyInput = document.getElementById("ai-api-key-input");
+      if (prov === "offline") {
+        keyInput.placeholder = "API ключ не требуется для оффлайн режима";
+      } else {
+        keyInput.placeholder = `Вставьте ключ для ${prov.toUpperCase()}...`;
+      }
+    }
+
+    function saveAiKey() {
+      const k = document.getElementById("ai-api-key-input").value.trim();
+      const prov = document.getElementById("ai-provider-select").value;
+      localStorage.setItem(`mv_key_${prov}`, k);
+      showToast(`Ключ для ${prov.toUpperCase()} сохранен!`);
+    }
+
+    function sendQuickPrompt(promptText) {
+      document.getElementById("chat-user-input").value = promptText;
+      sendChatMessage();
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById("chat-user-input");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const chat = document.getElementById("chat-messages");
+      chat.innerHTML += `<div class="chat-bubble user">${escapeHtml(msg)}</div>`;
+      input.value = "";
+      chat.scrollTop = chat.scrollHeight;
+
+      const prov = document.getElementById("ai-provider-select").value;
+      const key = localStorage.getItem(`mv_key_${prov}`);
+
+      if (prov === "offline" || !key) {
+        setTimeout(() => {
+          let fallback = "";
+          if (msg.includes("Coyote") || msg.includes("прыжок")) {
+            fallback = "💡 <b>Паттерн Coyote Time в Godot 4:</b> Используйте таймер `coyote_timer = 0.12`. Когда игрок на полу — таймер равен максимуму. Когда падает с обрыва — таймер тикает вниз `delta`. Если нажата кнопка прыжка и `coyote_timer > 0` — разрешаем прыжок. Это дает идеальное ощущение контроля!";
+          } else if (msg.includes("босс") || msg.includes("Босс")) {
+            fallback = "👾 <b>Дизайн босса:</b> Фаза 1 — 2 медленных замаха (красный свет для парирования). Фаза 2 — взлет и удар по земле (ударная волна, перепрыгивать). Фаза 3 — ярость и пулеметная очередь, где каждое парирование возвращает пулю в босса!";
+          } else {
+            fallback = `💡 <i>(Локальный режим)</i>: Укажите бесплатный ключ API (${prov.toUpperCase()}) в левой панели для полноценных ответов нейросети. По текущему спринту: реализуем Шаг 1 в CharacterBody2D.`;
+          }
+          chat.innerHTML += `<div class="chat-bubble bot">${fallback}</div>`;
+          chat.scrollTop = chat.scrollHeight;
+        }, 400);
+        return;
+      }
+
+      // API Call (DeepSeek / Groq / OpenRouter)
+      try {
+        let endpoint = "https://api.deepseek.com/chat/completions";
+        let model = "deepseek-chat";
+
+        if (prov === "groq") {
+          endpoint = "https://api.groq.com/openai/v1/chat/completions";
+          model = "llama-3.3-70b-versatile";
+        } else if (prov === "openrouter") {
+          endpoint = "https://openrouter.ai/api/v1/chat/completions";
+          model = "deepseek/deepseek-r1:free";
+        }
+
+        const resp = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + key
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              {
+                role: "system",
+                content: "Ты ведущий геймдизайнер и техлид игры Кибер-Утка (2D метроидвания на Godot 4, вдохновленная Nine Sols и Hollow Knight). Отвечай технически точно, с кодом GDScript когда уместно, на русском языке."
+              },
+              { role: "user", content: msg }
+            ]
+          })
+        });
+
+        const data = await resp.json();
+        const reply = data.choices[0].message.content;
+        chat.innerHTML += `<div class="chat-bubble bot">${escapeHtml(reply)}</div>`;
+      } catch (err) {
+        chat.innerHTML += `<div class="chat-bubble bot" style="color:var(--accent-rose);">Ошибка вызова API: ${escapeHtml(err.message)}</div>`;
+      }
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    // 8. AI CONTEXT GENERATOR FOR CURSOR / GROK
+    function generateFullContext() {
+      const activeTasks = tasks.filter(t => t.status === "in-progress").map(t => `- [В РАБОТЕ] ${t.title} (${t.author})`).join("\n");
+      const backlogTasks = tasks.filter(t => t.status === "backlog").map(t => `- [БЭКЛОГ] ${t.title} (${t.author})`).join("\n");
+      const currentStep = ROADMAP.find(s => s.id === currentSprintStepId) || ROADMAP[1];
+
+      return `# PROJECT CONTEXT: CYBER-DUCK METROIDVANIA
+## 1. Сеттинг и Персонаж
+- **Жанр:** 2D Мрачная Киберпанк-Метроидвания (Nine Sols + Hollow Knight).
+- **Движок:** Godot Engine 4.3+ (GDScript, 2D костная анимация Skeleton2D).
+- **Главный герой:** Кибер-Утка (Агент-09), циничный детектив-наемник в карго-штанах, старых кроссовках и грязной майке с армейским жетоном.
+- **Импланты героя (Ability Gating):**
+  1. Нейро-глаз «Спектр» (проявляет скрытые стены и снимает синие лазерные решетки).
+  2. Кибер-рука (парирование пуль с таймингом 0.15с, Hitstop 0.08с, выбивание дверей).
+  3. Реактивные кроссовки (горизонтальный рывок Dash с i-frames через лазеры).
+  4. Трос-гарпун (зацеп за неоновые точки подвеса на потолке).
+
+## 2. Текущий фокус спринта недели
+- **Активный шаг:** ${currentStep.id.toUpperCase()}: ${currentStep.title}
+- **Технологии шага:** ${currentStep.tech}
+- **Описание:** ${currentStep.desc}
+
+## 3. Канбан-доска (Текущий статус задач)
+${activeTasks || "Нет задач в работе"}
+${backlogTasks}
+
+## 4. Архитектура Веб-Хаба (React FSD)
+- Стек: React (Vite + TypeScript) + Feature-Sliced Design (app, pages, widgets, features, entities, shared).
+- Синхронизация: LocalStorage / Host SQLite api.php.
+`;
+    }
+
+    function copyContextForAgent() {
+      const text = generateFullContext();
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Слепок проекта скопирован! Вставьте в Cursor или Grok");
+      });
+    }
+
+    function copyContextJson() {
+      const data = {
+        project: "Cyber-Duck Metroidvania",
+        engine: "Godot 4.3",
+        currentSprint: currentSprintStepId,
+        tasks: tasks,
+        roadmap: ROADMAP,
+        notes: notes
+      };
+      navigator.clipboard.writeText(JSON.stringify(data, null, 2)).then(() => {
+        showToast("context.json скопирован в буфер обмена!");
+      });
+    }
+
+    function downloadContextFile() {
+      const text = generateFullContext();
+      const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "PROJECT_CONTEXT.md";
+      a.click();
+      showToast("Файл PROJECT_CONTEXT.md скачан!");
+    }
+
+    function updateContextPreview() {
+      const el = document.getElementById("context-preview-box");
+      if (el) el.innerText = generateFullContext();
+    }
+
+    // 9. NAVIGATION
+    const VIEW_META = {
+      dashboard: { t: "Обзор проекта", s: "Статус разработки кибер-метроидвании" },
+      curriculum: { t: "Роадмап (0 → Steam)", s: "Пошаговый план от установки Godot до релиза в магазине" },
+      kanban: { t: "Канбан-доска", s: "Недельный спринт и распределение задач" },
+      hero: { t: "Досье Кибер-Утки", s: "Анатомия имплантов и способности героя" },
+      gallery: { t: "Арт-хранилище", s: "Галерея концептов, спрайтов и референсов" },
+      notes: { t: "Мысли & GDD", s: "Голосовые и текстовые заметки команды" },
+      "ai-chat": { t: "Встроенный ИИ-Чат", s: "Диалог с геймдизайн-ассистентом (DeepSeek / Groq / OpenRouter)" },
+      "ai-export": { t: "AI Context / Export", s: "Генератор единого контекста для Cursor и Grok" },
+      "fsd-spec": { t: "React FSD Спецификация", s: "Архитектура слоев для перехода на React" }
+    };
+
+    function switchView(viewName) {
+      document.querySelectorAll(".view-container").forEach(el => el.classList.remove("active"));
+      const target = document.getElementById("view-" + viewName);
+      if (target) target.classList.add("active");
+
+      document.querySelectorAll(".nav-item").forEach(item => {
+        item.classList.toggle("active", item.getAttribute("data-view") === viewName);
+      });
+      document.querySelectorAll(".mobile-nav-item").forEach(item => {
+        item.classList.toggle("active", item.getAttribute("data-view") === viewName);
+      });
+
+      const m = VIEW_META[viewName] || { t: "Разработка", s: "" };
+      document.getElementById("view-title").innerText = m.t;
+      document.getElementById("view-subtitle").innerText = m.s;
+      document.getElementById("sidebar").classList.remove("open");
+
+      if (viewName === "ai-export") updateContextPreview();
+    }
+
+    document.querySelectorAll("[data-view]").forEach(el => {
+      el.addEventListener("click", () => switchView(el.getAttribute("data-view")));
+    });
+    document.getElementById("mobile-toggle").addEventListener("click", () => {
+      document.getElementById("sidebar").classList.toggle("open");
+    });
+
+    // 10. UTILITIES
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.innerText = msg;
+      t.style.display = "block";
+      setTimeout(() => { t.style.display = "none"; }, 3000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // INIT
+    window.addEventListener("DOMContentLoaded", () => {
+      checkAuth();
+      renderCurriculum();
+      renderKanban();
+      renderGallery();
+      renderNotes();
+      updateSprintProgress();
+      updateContextPreview();
+
+      const savedProv = document.getElementById("ai-provider-select").value;
+      const savedKey = localStorage.getItem(`mv_key_${savedProv}`);
+      if (savedKey) document.getElementById("ai-api-key-input").value = savedKey;
+    });
+  </script>
+</body>
+</html>

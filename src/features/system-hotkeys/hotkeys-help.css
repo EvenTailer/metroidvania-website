@@ -1,0 +1,116 @@
+.hotkeys-help {
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(11, 16, 28, 0.98) 100%);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  border-radius: 12px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 242, 254, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.hotkeys-help-head,
+.hotkeys-help-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hotkeys-help-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(2, 6, 23, 0.4);
+}
+
+.hotkeys-help-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.hotkeys-help-subtitle,
+.hotkeys-help-hint {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.hotkeys-help-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.hotkeys-help-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hotkeys-help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 8px;
+}
+
+.hotkeys-help-row {
+  background: rgba(2, 6, 23, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.hotkeys-help-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.hotkeys-help-keys {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.hotkeys-help kbd {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: monospace;
+  background: rgba(0, 242, 254, 0.12);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+  border-radius: 5px;
+  padding: 3px 7px;
+  min-width: 22px;
+  text-align: center;
+}
+
+.hotkeys-help-foot {
+  padding: 12px 20px;
+  background: rgba(2, 6, 23, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.hotkeys-help-ok {
+  font-size: 11px;
+  padding: 4px 12px;
+}
