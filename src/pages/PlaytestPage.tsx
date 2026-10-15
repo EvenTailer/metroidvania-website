@@ -176,7 +176,7 @@ export const PlaytestPage: React.FC<PlaytestPageProps> = ({
           </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '14px', alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '14px', alignItems: 'start' }}>
           {visible.map(report => (
             <PlaytestCard
               key={report.id}

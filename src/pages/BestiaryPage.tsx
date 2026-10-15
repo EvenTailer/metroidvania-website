@@ -171,7 +171,7 @@ export const BestiaryPage: React.FC<BestiaryPageProps> = ({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))',
             gap: '14px',
             alignItems: 'start'
           }}

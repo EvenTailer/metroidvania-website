@@ -82,6 +82,8 @@ export const GdscriptGeneratorPage: React.FC<GdscriptGeneratorPageProps> = ({
         <div
           style={{
             display: 'flex',
+            flexWrap: 'wrap',
+            gap: '4px',
             background: 'rgba(2, 6, 23, 0.7)',
             padding: '4px',
             borderRadius: '8px',

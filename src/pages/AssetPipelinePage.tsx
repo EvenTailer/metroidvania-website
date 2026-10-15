@@ -301,7 +301,7 @@ export const AssetPipelinePage: React.FC<AssetPipelinePageProps> = ({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))',
             gap: '14px',
             alignItems: 'start'
           }}

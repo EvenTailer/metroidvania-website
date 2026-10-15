@@ -160,7 +160,7 @@ export const HeroPage: React.FC<HeroPageProps> = ({
 
       {/* TAB 1: ABILITIES */}
       {activeTab === 'abilities' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '16px' }}>
           {abilities.map(ab => {
             const statusColor = ab.status === 'done' ? 'var(--accent-emerald)' : ab.status === 'in-progress' ? 'var(--accent-amber)' : 'var(--text-muted)';
             const statusLabel = ab.status === 'done' ? 'Готово в Godot' : ab.status === 'in-progress' ? 'В разработке' : 'В планах';
@@ -280,9 +280,9 @@ export const HeroPage: React.FC<HeroPageProps> = ({
 
       {/* TAB 3: CHARACTERS */}
       {activeTab === 'characters' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '16px' }}>
           {characters.map(char => (
-            <div key={char.id} className="panel hero-dossier" style={{ gridTemplateColumns: '120px 1fr', padding: '16px' }}>
+            <div key={char.id} className="panel hero-dossier hero-dossier-card" style={{ padding: '16px' }}>
               <div
                 style={{
                   border: '1px solid var(--border-bright)',

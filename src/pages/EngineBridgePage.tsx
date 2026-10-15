@@ -129,7 +129,7 @@ export const EngineBridgePage: React.FC<EngineBridgePageProps> = ({
           border: '1px solid var(--border)'
         }}
       >
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button
             type="button"
             className={`btn ${activeTab === 'bridge' ? 'btn-primary' : 'btn-secondary'}`}

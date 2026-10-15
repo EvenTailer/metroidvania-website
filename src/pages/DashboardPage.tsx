@@ -225,7 +225,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   flexWrap: 'wrap'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '220px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '160px' }}>
                   <span className={`card-tag ${task.category}`} style={{ margin: 0 }}>
                     {task.category === 'code' ? 'Код' : task.category === 'art' ? 'Арт' : task.category === 'design' ? 'Дизайн' : 'Звук'}
                   </span>
@@ -287,7 +287,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             className="field"
             value={quickTaskTitle}
             placeholder="+ Быстро добавить задачу в текущий спринт..."
-            style={{ flex: 1, minWidth: '220px' }}
+            style={{ flex: 1, minWidth: '160px' }}
             onChange={(e) => setQuickTaskTitle(e.target.value)}
           />
           <select

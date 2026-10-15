@@ -1534,6 +1534,11 @@ body {
   border: 1px solid var(--border-bright);
 }
 
+.hero-dossier-card {
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+}
+
 .field {
   width: 100%;
   min-height: 48px;
@@ -5088,6 +5093,16 @@ input, textarea, select { font-size: 16px; }
     padding: 6px !important;
     border-radius: 50% !important;
     gap: 0 !important;
+  }
+
+  .hero-dossier-card {
+    grid-template-columns: 1fr !important;
+  }
+
+  .modal-box {
+    padding: 16px 14px;
+    max-height: 92dvh;
+    border-radius: var(--radius-md);
   }
 }
 
