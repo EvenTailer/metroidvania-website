@@ -39,7 +39,11 @@ export function useSpeechInput(onToast: (msg: string) => void) {
     );
 
     if (!handle) {
-      onToast('Голос недоступен в этом браузере. Наберите текст.');
+      if (typeof window !== 'undefined' && !window.isSecureContext) {
+        onToast('Микрофон требует HTTPS (SSL). Включите сертификат на хостинге или используйте диктовку на клавиатуре.');
+      } else {
+        onToast('Голос недоступен в этом браузере. Наберите текст или используйте диктовку на клавиатуре.');
+      }
       return;
     }
 
