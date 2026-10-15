@@ -22,6 +22,11 @@ export function startSpeechRecognition(
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRec) return null;
 
+  const isIos = typeof navigator !== 'undefined' && (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  );
+
   let userStopped = false;
   let finished = false;
   let rec: any = null;
@@ -40,14 +45,17 @@ export function startSpeechRecognition(
   const attach = () => {
     rec = new SpeechRec();
     rec.lang = 'ru-RU';
-    rec.continuous = true;
+    rec.continuous = !isIos; // iOS Safari throws or cancels if continuous is true
     rec.interimResults = true;
+    rec.maxAlternatives = 1;
 
     rec.onresult = (event: any) => {
       let nextInterim = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const chunk = event.results[i][0].transcript as string;
-        if (event.results[i].isFinal) parts.push(chunk.trim());
+        const item = event.results[i];
+        if (!item || !item[0]) continue;
+        const chunk = item[0].transcript as string;
+        if (item.isFinal) parts.push(chunk.trim());
         else nextInterim += chunk;
       }
       interim = nextInterim.trim();
@@ -62,7 +70,7 @@ export function startSpeechRecognition(
     };
 
     rec.onend = () => {
-      if (!userStopped) {
+      if (!userStopped && !isIos) {
         try {
           attach();
           rec.start();
@@ -75,10 +83,11 @@ export function startSpeechRecognition(
     };
   };
 
-  attach();
   try {
+    attach();
     rec.start();
-  } catch {
+  } catch (err) {
+    console.warn('[Speech] Start failed:', err);
     return null;
   }
 
