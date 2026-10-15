@@ -163,6 +163,11 @@ export function galleryDevApiPlugin(root: string): Plugin {
   const narrativeDataFile = path.join(publicDir, 'data', 'narrative.json');
   const boardDataFile = path.join(publicDir, 'data', 'board.json');
   const assetsDataFile = path.join(publicDir, 'data', 'assets.json');
+  const matrixDataFile = path.join(publicDir, 'data', 'matrix.json');
+  const bestiaryDataFile = path.join(publicDir, 'data', 'bestiary.json');
+  const playtestDataFile = path.join(publicDir, 'data', 'playtest.json');
+  const weeklyPlanDataFile = path.join(publicDir, 'data', 'weekly-plan.json');
+  const engineDataFile = path.join(publicDir, 'data', 'engine.json');
   const maxBytes = 5 * 1024 * 1024;
   const token = '1111';
 
@@ -339,7 +344,295 @@ export function galleryDevApiPlugin(root: string): Plugin {
           return;
         }
 
-        // --- 5. GALLERY API ---
+        // --- 5. ROOM MATRIX API ---
+        if (url === '/api/matrix.php') {
+          if (req.method === 'GET') {
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            if (!fs.existsSync(matrixDataFile)) {
+              res.end(JSON.stringify({ initialized: false, rooms: [], sectors: [] }));
+              return;
+            }
+            try {
+              res.end(fs.readFileSync(matrixDataFile, 'utf8'));
+            } catch {
+              res.end(JSON.stringify({ initialized: false, rooms: [], sectors: [] }));
+            }
+            return;
+          }
+          if (req.method === 'POST') {
+            const bodyBuf = await readBody(req);
+            try {
+              const body = JSON.parse(bodyBuf.toString('utf8'));
+              if (!Array.isArray(body.rooms)) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: 'Invalid JSON' }));
+                return;
+              }
+              const payload = {
+                initialized: true,
+                rooms: body.rooms,
+                sectors: Array.isArray(body.sectors) ? body.sectors : [],
+                savedAt: new Date().toISOString()
+              };
+              fs.mkdirSync(path.dirname(matrixDataFile), { recursive: true });
+              fs.writeFileSync(matrixDataFile, JSON.stringify(payload, null, 2), 'utf8');
+              res.setHeader('Content-Type', 'application/json; charset=utf-8');
+              res.end(JSON.stringify({ ok: true, savedAt: payload.savedAt }));
+              return;
+            } catch {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Invalid JSON' }));
+              return;
+            }
+          }
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method not allowed' }));
+          return;
+        }
+
+        // --- 6. BESTIARY API ---
+        if (url === '/api/bestiary.php') {
+          if (req.method === 'GET') {
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            if (!fs.existsSync(bestiaryDataFile)) {
+              res.end(JSON.stringify({ initialized: false, items: [] }));
+              return;
+            }
+            try {
+              res.end(fs.readFileSync(bestiaryDataFile, 'utf8'));
+            } catch {
+              res.end(JSON.stringify({ initialized: false, items: [] }));
+            }
+            return;
+          }
+          if (req.method === 'POST') {
+            const bodyBuf = await readBody(req);
+            try {
+              const body = JSON.parse(bodyBuf.toString('utf8'));
+              if (!Array.isArray(body.items)) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: 'Invalid JSON' }));
+                return;
+              }
+              const payload = {
+                initialized: true,
+                items: body.items,
+                savedAt: new Date().toISOString()
+              };
+              fs.mkdirSync(path.dirname(bestiaryDataFile), { recursive: true });
+              fs.writeFileSync(bestiaryDataFile, JSON.stringify(payload, null, 2), 'utf8');
+              res.setHeader('Content-Type', 'application/json; charset=utf-8');
+              res.end(JSON.stringify({ ok: true, savedAt: payload.savedAt }));
+              return;
+            } catch {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Invalid JSON' }));
+              return;
+            }
+          }
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method not allowed' }));
+          return;
+        }
+
+        // --- 7. PLAYTEST API ---
+        if (url === '/api/playtest.php') {
+          if (req.method === 'GET') {
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            if (!fs.existsSync(playtestDataFile)) {
+              res.end(JSON.stringify({ initialized: false, items: [] }));
+              return;
+            }
+            try {
+              res.end(fs.readFileSync(playtestDataFile, 'utf8'));
+            } catch {
+              res.end(JSON.stringify({ initialized: false, items: [] }));
+            }
+            return;
+          }
+          if (req.method === 'POST') {
+            const bodyBuf = await readBody(req);
+            try {
+              const body = JSON.parse(bodyBuf.toString('utf8'));
+              if (!Array.isArray(body.items)) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: 'Invalid JSON' }));
+                return;
+              }
+              const payload = {
+                initialized: true,
+                items: body.items,
+                savedAt: new Date().toISOString()
+              };
+              fs.mkdirSync(path.dirname(playtestDataFile), { recursive: true });
+              fs.writeFileSync(playtestDataFile, JSON.stringify(payload, null, 2), 'utf8');
+              res.setHeader('Content-Type', 'application/json; charset=utf-8');
+              res.end(JSON.stringify({ ok: true, savedAt: payload.savedAt }));
+              return;
+            } catch {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Invalid JSON' }));
+              return;
+            }
+          }
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method not allowed' }));
+          return;
+        }
+
+        // --- 8. WEEKLY PLAN API ---
+        if (url === '/api/weekly-plan.php') {
+          if (req.method === 'GET') {
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            if (!fs.existsSync(weeklyPlanDataFile)) {
+              res.end(JSON.stringify({ initialized: false, plan: null }));
+              return;
+            }
+            try {
+              res.end(fs.readFileSync(weeklyPlanDataFile, 'utf8'));
+            } catch {
+              res.end(JSON.stringify({ initialized: false, plan: null }));
+            }
+            return;
+          }
+          if (req.method === 'POST') {
+            const bodyBuf = await readBody(req);
+            try {
+              const body = JSON.parse(bodyBuf.toString('utf8'));
+              const payload = {
+                initialized: true,
+                plan: body.plan || body,
+                savedAt: new Date().toISOString()
+              };
+              fs.mkdirSync(path.dirname(weeklyPlanDataFile), { recursive: true });
+              fs.writeFileSync(weeklyPlanDataFile, JSON.stringify(payload, null, 2), 'utf8');
+              res.setHeader('Content-Type', 'application/json; charset=utf-8');
+              res.end(JSON.stringify({ ok: true, savedAt: payload.savedAt }));
+              return;
+            } catch {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Invalid JSON' }));
+              return;
+            }
+          }
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method not allowed' }));
+          return;
+        }
+
+        // --- 9. ENGINE BRIDGE API ---
+        if (url === '/api/engine.php') {
+          if (req.method === 'GET') {
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            if (!fs.existsSync(engineDataFile)) {
+              res.end(JSON.stringify({ initialized: false, builds: [], releaseChecklist: [] }));
+              return;
+            }
+            try {
+              res.end(fs.readFileSync(engineDataFile, 'utf8'));
+            } catch {
+              res.end(JSON.stringify({ initialized: false, builds: [], releaseChecklist: [] }));
+            }
+            return;
+          }
+          if (req.method === 'POST') {
+            const bodyBuf = await readBody(req);
+            try {
+              const body = JSON.parse(bodyBuf.toString('utf8'));
+              const payload = {
+                initialized: true,
+                builds: Array.isArray(body.builds) ? body.builds : [],
+                releaseChecklist: Array.isArray(body.releaseChecklist) ? body.releaseChecklist : [],
+                physicsParams: body.physicsParams || null,
+                states: Array.isArray(body.states) ? body.states : [],
+                savedAt: new Date().toISOString()
+              };
+              fs.mkdirSync(path.dirname(engineDataFile), { recursive: true });
+              fs.writeFileSync(engineDataFile, JSON.stringify(payload, null, 2), 'utf8');
+              res.setHeader('Content-Type', 'application/json; charset=utf-8');
+              res.end(JSON.stringify({ ok: true, savedAt: payload.savedAt }));
+              return;
+            } catch {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Invalid JSON' }));
+              return;
+            }
+          }
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method not allowed' }));
+          return;
+        }
+
+        // --- 10. FULL BACKUP API ---
+        if (url === '/api/backup.php') {
+          const allDataFiles: Record<string, string> = {
+            board: boardDataFile,
+            matrix: matrixDataFile,
+            bestiary: bestiaryDataFile,
+            playtest: playtestDataFile,
+            weeklyPlan: weeklyPlanDataFile,
+            engine: engineDataFile,
+            assets: assetsDataFile,
+            gallery: galleryDataFile,
+            chat: chatDataFile,
+            narrative: narrativeDataFile
+          };
+
+          if (req.method === 'GET') {
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            const bundle: Record<string, unknown> = {
+              version: '1.0',
+              exportedAt: new Date().toISOString(),
+              project: 'cyber-duck-metroidvania-hub',
+              data: {} as Record<string, unknown>
+            };
+            for (const [key, fPath] of Object.entries(allDataFiles)) {
+              if (fs.existsSync(fPath)) {
+                try {
+                  (bundle.data as Record<string, unknown>)[key] = JSON.parse(fs.readFileSync(fPath, 'utf8'));
+                } catch {
+                  (bundle.data as Record<string, unknown>)[key] = null;
+                }
+              } else {
+                (bundle.data as Record<string, unknown>)[key] = null;
+              }
+            }
+            res.end(JSON.stringify(bundle, null, 2));
+            return;
+          }
+
+          if (req.method === 'POST') {
+            const bodyBuf = await readBody(req);
+            try {
+              const body = JSON.parse(bodyBuf.toString('utf8')) as { data?: Record<string, unknown> };
+              if (!body.data || typeof body.data !== 'object') {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: 'Invalid backup structure' }));
+                return;
+              }
+              const restored: string[] = [];
+              for (const [key, fPath] of Object.entries(allDataFiles)) {
+                if (body.data[key] !== undefined && body.data[key] !== null) {
+                  fs.mkdirSync(path.dirname(fPath), { recursive: true });
+                  fs.writeFileSync(fPath, JSON.stringify(body.data[key], null, 2), 'utf8');
+                  restored.push(key);
+                }
+              }
+              res.setHeader('Content-Type', 'application/json; charset=utf-8');
+              res.end(JSON.stringify({ ok: true, restored, restoredAt: new Date().toISOString() }));
+              return;
+            } catch {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Invalid JSON' }));
+              return;
+            }
+          }
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method not allowed' }));
+          return;
+        }
+
+        // --- 11. GALLERY API ---
         if (url !== '/api/gallery.php') {
           next();
           return;

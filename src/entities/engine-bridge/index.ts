@@ -4,3 +4,4 @@ export * from './bundlePacker';
 export * from './assetFiles';
 export * from './folderHandleStore';
 export * from './slice';
+export * from './api';

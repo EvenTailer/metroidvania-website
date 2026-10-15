@@ -155,6 +155,14 @@ export const roomMatrixSlice = createSlice({
       state.sectors = DEFAULT_SECTORS;
       state.selectedRoomId = DEFAULT_ROOMS[0]?.id || null;
       state.simulatedAbilities = ['ab-jump'];
+    },
+    matrixHydrated(state, action: PayloadAction<{ rooms: RoomNode[]; sectors?: SectorInfo[] }>) {
+      if (Array.isArray(action.payload.rooms) && action.payload.rooms.length > 0) {
+        state.rooms = action.payload.rooms;
+      }
+      if (Array.isArray(action.payload.sectors) && action.payload.sectors.length > 0) {
+        state.sectors = action.payload.sectors;
+      }
     }
   }
 });
@@ -173,7 +181,8 @@ export const {
   simulatedAbilityToggled,
   simulatedAbilitiesReset,
   allAbilitiesUnlocked,
-  matrixResetToDefault
+  matrixResetToDefault,
+  matrixHydrated
 } = roomMatrixSlice.actions;
 
 export const roomMatrixReducer = roomMatrixSlice.reducer;

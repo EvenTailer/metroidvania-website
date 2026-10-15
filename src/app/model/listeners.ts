@@ -8,13 +8,13 @@ import type { GalleryState } from '../../entities/gallery';
 import type { CharactersState } from '../../entities/character';
 import type { ChatState } from '../../entities/chat';
 import type { NarrativeState } from '../../entities/narrative';
-import type { WeeklyPlanState } from '../../entities/weekly-plan';
-import type { RoomMatrixState } from '../../entities/room-matrix';
-import type { BestiaryState } from '../../entities/bestiary';
-import type { PlaytestState } from '../../entities/playtest';
+import { saveRoomMatrixToServer, type RoomMatrixState } from '../../entities/room-matrix';
+import { saveBestiaryToServer, type BestiaryState } from '../../entities/bestiary';
+import { savePlaytestToServer, type PlaytestState } from '../../entities/playtest';
+import { saveWeeklyPlanToServer, type WeeklyPlanState } from '../../entities/weekly-plan';
+import { saveEngineToServer, type EngineBridgeState } from '../../entities/engine-bridge';
 import { pipelineAcked, pipelineSyncSet, saveAssetPipeline, type AssetPipelineState } from '../../entities/asset-pipeline';
 import type { GdscriptGeneratorState } from '../../entities/gdscript-generator';
-import type { EngineBridgeState } from '../../entities/engine-bridge';
 import { saveScreenshotIdb } from '../../shared/lib/indexedDbStorage';
 
 export interface HubShape {
@@ -194,6 +194,113 @@ export function createHubListener() {
         api.dispatch(pipelineAcked(savedAt));
       } catch {
         api.dispatch(pipelineSyncSet(false));
+      }
+    }
+  });
+
+  // Автосохранение матрицы комнат на сервере
+  listenerMiddleware.startListening({
+    predicate: (_action, current, previous) => {
+      const next = shape(current);
+      const prev = shape(previous);
+      if (!next.session.authed) return false;
+      return next.roomMatrix.rooms !== prev.roomMatrix.rooms || next.roomMatrix.sectors !== prev.roomMatrix.sectors;
+    },
+    effect: async (_action, api) => {
+      await api.delay(600);
+      const state = shape(api.getState());
+      if (!state.session.authed) return;
+      try {
+        await saveRoomMatrixToServer(state.roomMatrix.rooms, state.roomMatrix.sectors);
+      } catch {
+        /* оффлайн/локально */
+      }
+    }
+  });
+
+  // Автосохранение бестиария на сервере
+  listenerMiddleware.startListening({
+    predicate: (_action, current, previous) => {
+      const next = shape(current);
+      const prev = shape(previous);
+      if (!next.session.authed) return false;
+      return next.bestiary.items !== prev.bestiary.items;
+    },
+    effect: async (_action, api) => {
+      await api.delay(600);
+      const state = shape(api.getState());
+      if (!state.session.authed) return;
+      try {
+        await saveBestiaryToServer(state.bestiary.items);
+      } catch {
+        /* оффлайн/локально */
+      }
+    }
+  });
+
+  // Автосохранение плейтестов/багов на сервере
+  listenerMiddleware.startListening({
+    predicate: (_action, current, previous) => {
+      const next = shape(current);
+      const prev = shape(previous);
+      if (!next.session.authed) return false;
+      return next.playtest.items !== prev.playtest.items;
+    },
+    effect: async (_action, api) => {
+      await api.delay(600);
+      const state = shape(api.getState());
+      if (!state.session.authed) return;
+      try {
+        await savePlaytestToServer(state.playtest.items);
+      } catch {
+        /* оффлайн/локально */
+      }
+    }
+  });
+
+  // Автосохранение недельного плана на сервере
+  listenerMiddleware.startListening({
+    predicate: (_action, current, previous) => {
+      const next = shape(current);
+      const prev = shape(previous);
+      if (!next.session.authed) return false;
+      return next.weeklyPlan !== prev.weeklyPlan;
+    },
+    effect: async (_action, api) => {
+      await api.delay(600);
+      const state = shape(api.getState());
+      if (!state.session.authed) return;
+      try {
+        await saveWeeklyPlanToServer(state.weeklyPlan);
+      } catch {
+        /* оффлайн/локально */
+      }
+    }
+  });
+
+  // Автосохранение моста сборок и физики на сервере
+  listenerMiddleware.startListening({
+    predicate: (_action, current, previous) => {
+      const next = shape(current);
+      const prev = shape(previous);
+      if (!next.session.authed) return false;
+      return next.engineBridge.builds !== prev.engineBridge.builds
+        || next.engineBridge.releaseChecklist !== prev.engineBridge.releaseChecklist
+        || next.gdscriptGenerator !== prev.gdscriptGenerator;
+    },
+    effect: async (_action, api) => {
+      await api.delay(600);
+      const state = shape(api.getState());
+      if (!state.session.authed) return;
+      try {
+        await saveEngineToServer({
+          builds: state.engineBridge.builds,
+          releaseChecklist: state.engineBridge.releaseChecklist,
+          physicsParams: state.gdscriptGenerator.physicsParams,
+          states: state.gdscriptGenerator.states
+        });
+      } catch {
+        /* оффлайн/локально */
       }
     }
   });

@@ -4,3 +4,4 @@ export * from './normalize';
 export * from './importBestiary';
 export * from './gdscriptExporter';
 export * from './slice';
+export * from './api';

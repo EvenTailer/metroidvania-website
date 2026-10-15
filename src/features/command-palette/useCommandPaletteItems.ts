@@ -18,6 +18,7 @@ interface BuildCommandItemsParams {
   onOpenGlossary: () => void;
   onOpenHotkeys: () => void;
   onToggleSound: () => void;
+  onOpenBackup?: () => void;
 }
 
 export function buildCommandPaletteItems({
@@ -32,7 +33,8 @@ export function buildCommandPaletteItems({
   onCycleAuthor,
   onOpenGlossary,
   onOpenHotkeys,
-  onToggleSound
+  onToggleSound,
+  onOpenBackup
 }: BuildCommandItemsParams): CommandPaletteItem[] {
   const items: CommandPaletteItem[] = [];
 
@@ -59,6 +61,16 @@ export function buildCommandPaletteItems({
       keywords: ['глоссарий', 'словарь', 'термины', 'койот', 'буфер', 'godot'],
       onSelect: onOpenGlossary
     },
+    ...(onOpenBackup ? [{
+      id: 'action-backup',
+      category: 'actions' as const,
+      title: 'Резервная копия и серверные данные',
+      subtitle: 'Скачать полный бэкап проекта (.json) или восстановить файлы',
+      icon: '📦',
+      badge: 'Бэкап',
+      keywords: ['бэкап', 'резервная копия', 'экспорт', 'импорт', 'сервер', 'сохранить'],
+      onSelect: onOpenBackup
+    }] : []),
     {
       id: 'action-hotkeys',
       category: 'actions',

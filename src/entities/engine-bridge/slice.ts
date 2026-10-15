@@ -147,6 +147,14 @@ export const engineBridgeSlice = createSlice({
       state.builds = [];
       state.selectedBuildId = null;
       state.buildFilter = { stage: 'all', status: 'all', searchQuery: '' };
+    },
+    engineHydrated(state, action: PayloadAction<{ builds?: BuildRelease[]; releaseChecklist?: Record<string, boolean> }>) {
+      if (Array.isArray(action.payload.builds) && action.payload.builds.length > 0) {
+        state.builds = action.payload.builds;
+      }
+      if (action.payload.releaseChecklist && typeof action.payload.releaseChecklist === 'object') {
+        state.releaseChecklist = action.payload.releaseChecklist;
+      }
     }
   }
 });
@@ -165,5 +173,6 @@ export const {
   configFilesDiscovered,
   checklistItemToggled,
   checklistItemSet,
-  resetBuildsToDefault
+  resetBuildsToDefault,
+  engineHydrated
 } = engineBridgeSlice.actions;

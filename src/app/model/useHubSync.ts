@@ -12,6 +12,11 @@ import {
   pipelineReadySet,
   pipelineSyncSet
 } from '../../entities/asset-pipeline';
+import { fetchRoomMatrixFromServer, matrixHydrated } from '../../entities/room-matrix';
+import { fetchBestiaryFromServer, bestiaryImported } from '../../entities/bestiary';
+import { fetchPlaytestFromServer, reportsImported } from '../../entities/playtest';
+import { fetchWeeklyPlanFromServer, weeklyPlanReplaced } from '../../entities/weekly-plan';
+import { fetchEngineFromServer, engineHydrated } from '../../entities/engine-bridge';
 import { store, type AppDispatch, type RootState } from '../store';
 import { toastShown } from './uiSlice';
 
@@ -90,6 +95,41 @@ export function useHubSync() {
       .then(chapters => {
         if (cancelled || chapters.length === 0) return;
         dispatch(chaptersReplaced(chapters));
+      })
+      .catch(() => {});
+
+    fetchRoomMatrixFromServer()
+      .then(matrix => {
+        if (cancelled || !matrix.initialized) return;
+        dispatch(matrixHydrated({ rooms: matrix.rooms, sectors: matrix.sectors }));
+      })
+      .catch(() => {});
+
+    fetchBestiaryFromServer()
+      .then(b => {
+        if (cancelled || !b.initialized || b.items.length === 0) return;
+        dispatch(bestiaryImported(b.items));
+      })
+      .catch(() => {});
+
+    fetchPlaytestFromServer()
+      .then(p => {
+        if (cancelled || !p.initialized || p.items.length === 0) return;
+        dispatch(reportsImported(p.items));
+      })
+      .catch(() => {});
+
+    fetchWeeklyPlanFromServer()
+      .then(w => {
+        if (cancelled || !w.initialized || !w.plan) return;
+        dispatch(weeklyPlanReplaced(w.plan));
+      })
+      .catch(() => {});
+
+    fetchEngineFromServer()
+      .then(e => {
+        if (cancelled || !e.initialized) return;
+        dispatch(engineHydrated({ builds: e.builds, releaseChecklist: e.releaseChecklist }));
       })
       .catch(() => {});
 

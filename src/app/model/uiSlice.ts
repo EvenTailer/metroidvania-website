@@ -8,6 +8,7 @@ export interface UiState {
   commandPaletteOpen: boolean;
   hotkeysModalOpen: boolean;
   glossaryModalOpen: boolean;
+  backupModalOpen: boolean;
   soundMuted: boolean;
 }
 
@@ -20,6 +21,7 @@ const uiSlice = createSlice({
     commandPaletteOpen: false,
     hotkeysModalOpen: false,
     glossaryModalOpen: false,
+    backupModalOpen: false,
     soundMuted: isSoundMuted()
   } as UiState,
   reducers: {
@@ -44,6 +46,9 @@ const uiSlice = createSlice({
     glossaryModalSet(state, action: PayloadAction<boolean>) {
       state.glossaryModalOpen = action.payload;
     },
+    backupModalSet(state, action: PayloadAction<boolean>) {
+      state.backupModalOpen = action.payload;
+    },
     soundMutedSet(state, action: PayloadAction<boolean>) {
       state.soundMuted = action.payload;
       setSoundMuted(action.payload);
@@ -64,6 +69,7 @@ export const {
   commandPaletteSet,
   hotkeysModalSet,
   glossaryModalSet,
+  backupModalSet,
   soundMutedSet,
   soundMutedToggled
 } = uiSlice.actions;

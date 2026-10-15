@@ -7,6 +7,7 @@ interface SidebarProps {
   isOpen: boolean;
   onLogout: () => void;
   taskCount: number;
+  onOpenBackupModal?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -14,7 +15,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectView,
   isOpen,
   onLogout,
-  taskCount
+  taskCount,
+  onOpenBackupModal
 }) => {
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
@@ -231,6 +233,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </ul>
 
       <div className="sidebar-footer">
+        {onOpenBackupModal && (
+          <button
+            type="button"
+            onClick={onOpenBackupModal}
+            style={{
+              width: '100%',
+              marginBottom: '10px',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              border: '1px solid rgba(0, 242, 254, 0.3)',
+              background: 'rgba(0, 242, 254, 0.08)',
+              color: 'var(--accent-cyan)',
+              fontSize: '11.5px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
+          >
+            <span>📦</span>
+            <span>Бэкап & Сервер</span>
+          </button>
+        )}
         <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>Стек: Godot 4.3</span>
           <button onClick={onLogout} style={{ background: 'none', border: 'none', color: 'var(--accent-rose)', cursor: 'pointer', fontSize: '11px' }}>

@@ -16,6 +16,7 @@ import {
   sidebarSet,
   sidebarToggled,
   soundMutedToggled,
+  backupModalSet,
   toastShown
 } from './model/uiSlice';
 import { authorCycled, sessionLoggedIn, sessionLoggedOut } from '../entities/session';
@@ -30,6 +31,17 @@ import { PwaUpdateBanner } from '../shared/ui/PwaUpdateBanner';
 import { CommandPaletteModal, useCommandPaletteItems } from '../features/command-palette';
 import { HotkeysHelpModal, useGlobalHotkeys } from '../features/system-hotkeys';
 import { GlossaryModal } from '../features/glossary-guide';
+import { BackupRestoreModal } from '../features/backup-restore';
+import { tasksReplaced, sprintSet } from '../entities/task';
+import { stepsDoneApplied } from '../entities/roadmap';
+import { matrixHydrated } from '../entities/room-matrix';
+import { bestiaryImported } from '../entities/bestiary';
+import { reportsImported } from '../entities/playtest';
+import { weeklyPlanReplaced } from '../entities/weekly-plan';
+import { engineHydrated } from '../entities/engine-bridge';
+import { chaptersReplaced } from '../entities/narrative';
+import { galleryReplaced } from '../entities/gallery';
+import { messagesReplaced } from '../entities/chat';
 import { AppViewRouter } from './AppViewRouter';
 import { useFocusTimerWatch } from './model/useFocusTimerWatch';
 import type { AppDispatch, RootState } from './store';
@@ -80,6 +92,7 @@ export const App: React.FC = () => {
   const commandPaletteOpen = useSelector((state: RootState) => state.ui.commandPaletteOpen);
   const hotkeysModalOpen = useSelector((state: RootState) => state.ui.hotkeysModalOpen);
   const glossaryModalOpen = useSelector((state: RootState) => state.ui.glossaryModalOpen);
+  const backupModalOpen = useSelector((state: RootState) => state.ui.backupModalOpen);
   const soundMuted = useSelector((state: RootState) => state.ui.soundMuted);
 
   const currentView = useSyncExternalStore(subscribeRoute, viewFromLocation, () => 'dashboard' as ViewType);
@@ -140,6 +153,7 @@ export const App: React.FC = () => {
     dispatch(commandPaletteSet(false));
     dispatch(hotkeysModalSet(false));
     dispatch(glossaryModalSet(false));
+    dispatch(backupModalSet(false));
     dispatch(lightboxSet(null));
   }, [dispatch]);
 
@@ -165,7 +179,7 @@ export const App: React.FC = () => {
   const openGlossary = useCallback(() => dispatch(glossaryModalSet(true)), [dispatch]);
   const openHotkeys = useCallback(() => dispatch(hotkeysModalSet(true)), [dispatch]);
 
-  const blockAppShortcuts = commandPaletteOpen || hotkeysModalOpen || glossaryModalOpen || Boolean(lightboxUrl);
+  const blockAppShortcuts = commandPaletteOpen || hotkeysModalOpen || glossaryModalOpen || backupModalOpen || Boolean(lightboxUrl);
 
   useGlobalHotkeys({
     blockAppShortcuts,
@@ -177,6 +191,77 @@ export const App: React.FC = () => {
     onCloseSidebar: closeSidebar,
     onSelectView: selectView
   });
+
+  const backupData = {
+    board: {
+      tasks,
+      sprintStepId,
+      stepsDone: {}
+    },
+    roadmaps: {
+      docs,
+      activeId: activeRoadmapId
+    },
+    matrix: {
+      rooms: roomMatrix.rooms,
+      sectors: roomMatrix.sectors
+    },
+    bestiary: {
+      items: bestiary.items
+    },
+    playtest: {
+      items: playtest.items
+    },
+    weeklyPlan: {
+      plan: weeklyPlan
+    },
+    engine: {
+      builds: engineBridge.builds,
+      releaseChecklist: engineBridge.releaseChecklist,
+      physicsParams: gdscriptGenerator.physicsParams,
+      states: gdscriptGenerator.states
+    },
+    notes,
+    gallery,
+    characters,
+    narrative: chapters,
+    chat: messages
+  };
+
+  const handleRestoreData = useCallback((data: Record<string, any>) => {
+    if (data.board && Array.isArray(data.board.tasks)) {
+      dispatch(tasksReplaced(data.board.tasks));
+      if (data.board.sprintStepId) dispatch(sprintSet(data.board.sprintStepId));
+      if (data.board.stepsDone) dispatch(stepsDoneApplied(data.board.stepsDone));
+    }
+    if (data.matrix && Array.isArray(data.matrix.rooms)) {
+      dispatch(matrixHydrated({ rooms: data.matrix.rooms, sectors: data.matrix.sectors }));
+    }
+    if (data.bestiary && Array.isArray(data.bestiary.items)) {
+      dispatch(bestiaryImported(data.bestiary.items));
+    }
+    if (data.playtest && Array.isArray(data.playtest.items)) {
+      dispatch(reportsImported(data.playtest.items));
+    }
+    if (data.weeklyPlan) {
+      dispatch(weeklyPlanReplaced(data.weeklyPlan.plan || data.weeklyPlan));
+    }
+    if (data.engine) {
+      dispatch(engineHydrated({
+        builds: data.engine.builds,
+        releaseChecklist: data.engine.releaseChecklist
+      }));
+    }
+    if (data.narrative && Array.isArray(data.narrative)) {
+      dispatch(chaptersReplaced(data.narrative));
+    }
+    if (data.gallery && Array.isArray(data.gallery)) {
+      dispatch(galleryReplaced(data.gallery));
+    }
+    if (data.chat && Array.isArray(data.chat)) {
+      dispatch(messagesReplaced(data.chat));
+    }
+  }, [dispatch]);
 
   // Элементы командной палитры поиска
   const commandItems = useCommandPaletteItems({
@@ -191,7 +276,8 @@ export const App: React.FC = () => {
     onCycleAuthor: cycleAuthorRole,
     onOpenGlossary: openGlossary,
     onOpenHotkeys: openHotkeys,
-    onToggleSound: toggleSound
+    onToggleSound: toggleSound,
+    onOpenBackup: () => dispatch(backupModalSet(true))
   });
 
   if (!authed) {
@@ -228,6 +314,7 @@ export const App: React.FC = () => {
           isOpen={sidebarOpen}
           onLogout={() => dispatch(sessionLoggedOut())}
           taskCount={taskCount}
+          onOpenBackupModal={() => dispatch(backupModalSet(true))}
         />
 
         <main className="app-main">
@@ -297,6 +384,15 @@ export const App: React.FC = () => {
       <GlossaryModal
         isOpen={glossaryModalOpen}
         onClose={() => dispatch(glossaryModalSet(false))}
+      />
+
+      {/* Резервное копирование & Серверный бэкап */}
+      <BackupRestoreModal
+        isOpen={backupModalOpen}
+        onClose={() => dispatch(backupModalSet(false))}
+        fullData={backupData}
+        onRestore={handleRestoreData}
+        onShowToast={showToast}
       />
 
       {updateReady && <PwaUpdateBanner onApply={applyUpdate} />}
